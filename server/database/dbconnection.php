@@ -6,7 +6,7 @@ use PDO;
 use PDOException;
 
 class DataBaseConnection {
-    private $host = 'localhost';
+    private $host = '127.0.0.1';
     private $db_name = 'aviasales';
     private $username = 'root';
     private $password = '';

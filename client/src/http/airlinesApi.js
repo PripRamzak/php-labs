@@ -26,7 +26,7 @@ export const addAirline = async (name) => {
         const response = await fetch(`${API_URL}airlines.php?method=insert`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({name}),
+            body: JSON.stringify({ name }),
         });
 
         console.log('sended');
@@ -50,7 +50,7 @@ export const updateAirline = async (id, newData) => {
             body: JSON.stringify({ id, new_data: newData }),
         });
         if (!response.ok) {
-            throw new Error('Ошибка при обновлении комнаты');
+            throw new Error('Ошибка при обновлении аэропорта');
         }
         return await response.json();
     } catch (error) {

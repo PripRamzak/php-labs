@@ -114,6 +114,32 @@ class DataBaseManager
         return $statement->rowCount();
     }
 
+    public function call_procedure($procedure_name, $data)
+    {
+        $columns = array_keys($data);
+        $setParameters = [];
+
+        foreach($columns as $parameter) {
+            $setParameters[] = ":" . $parameter;
+        }
+
+        $setParameters = implode(', ', $setParameters);
+
+        $sql = "CALL $procedure_name($setParameters)";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        //echo($sql);
+        
+        foreach ($data as $parameter => $value)
+        {
+            //echo (':' . $parameter);
+            $stmt->bindValue(':' . $parameter, $value);
+        }
+
+        $stmt->execute();
+    }
+
     public function tableExists($tableName) {
         $query = "SHOW TABLES LIKE ?";
         $stmt = $this->pdo->prepare($query);

@@ -63,12 +63,12 @@ function CreateTicket({ show, onHide, cities, airlines }) {
 
         try {
             const ticket = {
-                departure_city_id: departureCityId,
-                arrival_city_id: arrivalCityId,
-                airline_id: airlineId,
                 departure_time: departureTime.toISOString(),
                 arrival_time: arrivalTime.toISOString(),
-                price
+                price,
+                departure_city_id: departureCityId,
+                arrival_city_id: arrivalCityId,
+                airline_id: airlineId
             };
             const result = await addTicket(ticket);
             if (result.error) {

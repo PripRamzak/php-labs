@@ -50,7 +50,7 @@ export const updateTicket = async (id, newData) => {
             body: JSON.stringify({ id, new_data: newData }),
         });
         if (!response.ok) {
-            throw new Error('Ошибка при обновлении комнаты');
+            throw new Error('Ошибка при обновлении билета');
         }
         return await response.json();
     } catch (error) {
