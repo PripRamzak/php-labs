@@ -19,7 +19,6 @@ const Cities = observer(({ cities, getCities }) => {
 
     const handleSearchChange = (e) => {
         setSearchedCity(e.target.value);
-        console.log(e.target.value);
         const filtred = cities.filter((city) => city.name.toLowerCase().includes(e.target.value.toLowerCase()));
         setFiltredCities(filtred);
     }
@@ -32,7 +31,6 @@ const Cities = observer(({ cities, getCities }) => {
         catch (e) {
             throw new Error(e.message);
         }
-        console.log(filtredCities);
     }
 
     return (

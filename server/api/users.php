@@ -34,39 +34,42 @@ $data = json_decode($json, true);
 error_log("Request Data: " . json_encode($data));
 
 function validateUserData($dbManager, $data, $excludeId = null) {
+    $errors = [];
+    global $table_name;
+
     if (empty($data['username'])) {
-        return ['error' => 'Имя пользователя обязательно'];
+        $errors[] = 'Имя пользователя обязательно';
     } elseif (strlen($data['username']) > 16) {
-        return ['error' => 'Имя пользователя не должно превышать 16 символов'];
+        $errors[] = 'Имя пользователя не должно превышать 16 символов';
     } elseif (!preg_match('/^[a-zA-Z0-9]+$/', $data['username'])) {
-        return ['error' => 'Имя пользователя может содержать только буквы и цифры'];
+        $errors[] = 'Имя пользователя может содержать только буквы и цифры';
     } else {
-        $allData = $dbManager->get_all_data('users');
+        $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $user) {
             if ($user['username'] == $data['username'] && $user['id'] != $excludeId) {
-                return ['error' => 'Пользователь с таким именем уже существует'];
+                $errors[] = 'Пользователь с таким именем уже существует';
             }
         }
     }
 
     if (empty($data['email'])) {
-        return ['error' => 'Email обязательно'];
+        $errors[] = 'Email обязательно';
     } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-        return ['error' => 'Неверный формат email'];
+        $errors[] = 'Неверный формат email';
     } else {
-        $allData = $dbManager->get_all_data('users');
+        $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $user) {
             if ($user['email'] == $data['email'] && $user['id'] != $excludeId) {
-                return ['error' => 'Пользователь с таким email уже существует'];
+                $errors[] = 'Пользователь с таким email уже существует';
             }
         }
     }
 
     if (empty($data['password'])) {
-        return ['error' => 'Пароль обязателен'];
+        $errors[] = 'Пароль обязателен';
     }
 
-    return ['status' => 'ok'];
+    return empty($errors) ? ['status' => 'ok'] : ['status' => 'error', 'error' => $errors];
 }
 
 function createTableIfNotExists($dbManager, $table_name) {
@@ -102,7 +105,7 @@ switch ($requestMethod) {
                     echo json_encode(['error' => 'Заполните все поля']);
                     exit;
                 }
-                $result = $dbManager->get_one_data($table_name, 'username', $username);
+                $result = $dbManager->get_with_condition($table_name, 'username', $username);
                 
                 if(isset($result['error']))
                 {
@@ -110,11 +113,13 @@ switch ($requestMethod) {
                 }
                 else if ($result['password'] != md5($password))
                 {
-                    echo json_encode(['error' => 'Неверный пароль ' . $result['username']]);
+                    echo json_encode(['error' => 'Неверный пароль']);
                     exit;
                 }
 
-                echo json_encode(['status' => 'ok']);
+                unset($result['password']);
+                unset($result['email']);
+                echo json_encode($result);
                 break;
 
 
@@ -126,7 +131,7 @@ switch ($requestMethod) {
                     try {
                         $dataToInsert['password'] = md5($dataToInsert['password']);
                         $result = $dbManager->insert_data($table_name, $dataToInsert);
-                        echo json_encode(['result' => $result]);
+                        echo json_encode($result);
                     } 
                     catch (Exception $e) {
                         if (strpos($e->getMessage(), '1062 Duplicate entry') !== false) {
@@ -155,18 +160,12 @@ switch ($requestMethod) {
                 $condition = isset($data['id']) ? $data['id'] : null;
                 $newData = isset($data['new_data']) ? $data['new_data'] : null;
 
-                createTableIfNotExists($dbManager, $table_name);
-                $validationResult = validateUserData($dbManager, $newData, $condition);
-                if (isset($validationResult['status']) && $validationResult['status'] === 'ok') {
                     try {
                         $result = $dbManager->update_data($table_name, $newData, $condition);
                         echo json_encode(['result' => $result]);
                     } catch (Exception $e) {
                         echo json_encode(['error' => [$e->getMessage()]]);
                     }
-                } else {
-                    echo json_encode($validationResult);
-                }
                 break;
 
             default:

@@ -1,15 +1,36 @@
-import { $authHost, $host } from "./index"
-import { jwtDecode } from 'jwt-decode'
+import axios from "axios";
 import { API_URL } from "../utils/consts";
 
-export const registration = async (username, email, password) => {
+export const fetchUsers = async () => {
+    try {
+        const response = await axios.get(`${API_URL}users.php?`);
+
+        if (response.status !== 200) {
+            throw new Error(`Ошибка сервера: ${response.statusText}`);
+        }
+
+        return response.data;
+    }
+    catch (error) {
+        if (error.response && error.response.data && error.response.data.error) {
+            console.error('Ошибка от сервера:', error.response.data.error);
+            throw new Error(`Ошибка при загрузке данных: ${error.response.data.error}`);
+        }
+
+        console.error('Ошибка сети или другая ошибка:', error.message);
+        throw new Error('Ошибка при загрузке данных. Пожалуйста, попробуйте позже.');
+    }
+};
+
+
+export const registration = async (user) => {
     try {
         const response = await fetch(`${API_URL}users.php?method=register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify(user),
         });
 
         if (!response.ok) {
@@ -66,6 +87,7 @@ export const login = async (username, password) => {
     }
 
     const result = await response.json();
+    console.log(result);
 
     if (result.error) {
         console.error('Ошибки сервера:', result.error);
@@ -74,3 +96,19 @@ export const login = async (username, password) => {
 
     return result;
 }
+
+export const updateUser = async (id, newData) => {
+    try {
+        const response = await fetch(`${API_URL}users.php?method=update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, new_data: newData }),
+        });
+        if (!response.ok) {
+            throw new Error('Ошибка при обновлении города');
+        }
+        return await response.json();
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};

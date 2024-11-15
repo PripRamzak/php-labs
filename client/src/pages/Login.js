@@ -7,6 +7,7 @@ import { REGISTRATION_ROUTE, MAIN_ROUTE } from '../utils/consts';
 import { login } from '../http/userApi';
 import { Context } from '..';
 import { observer } from 'mobx-react-lite';
+import { fetchDispatcherByUserId } from '../http/dispatchersApi';
 
 const Login = observer(() => {
     const navigate = useNavigate()
@@ -16,14 +17,19 @@ const Login = observer(() => {
 
     const click = async () => {
         try {
-            const response = await login(username.trim(), password);
+            const responseUser = await login(username.trim(), password);
 
-            if (response.error) {
-                console.log('Ошибки:', response.error);
-                setAlert(response.error);
+            if (responseUser.error) {
+                console.log('Ошибки:', responseUser.error);
+                setAlert(responseUser.error);
             }
             else {
-                localStorage.setItem('user', JSON.stringify({ username, password }));
+                const dispatcherData = await fetchDispatcherByUserId(responseUser.id);
+                if (dispatcherData) {
+                    responseUser.role = 'dispatcher';
+                }
+
+                localStorage.setItem('user', JSON.stringify(responseUser));
                 navigate(MAIN_ROUTE);
             }
         }

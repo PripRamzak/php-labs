@@ -1,42 +1,38 @@
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { authRoutes, publicRoutes } from '../routes';
-import { LOGIN_ROUTE, MAIN_ROUTE, REGISTRATION_ROUTE } from '../utils/consts';
+import { ADMIN_ROUTE, DISPATCHER_ROUTE, LOGIN_ROUTE, MAIN_ROUTE, PERSONAL_ACCOUNT_ROUTE, REGISTRATION_ROUTE } from '../utils/consts';
 import { Context } from '../index';
 import { observer } from 'mobx-react-lite';
 import NavBar from './NavBar';
 import Login from '../pages/Login';
 import Registration from '../pages/Registration';
-import { PrivateRoute } from './PrivateRoute';
 import Main from '../pages/Main';
+import Admin from '../pages/Admin';
+import PersonalAccount from '../pages/PersonalAccount';
+import { RoleRoute } from './RoleRoute';
+import Dispatcher from '../pages/Dispatcher';
 
 const AppRouter = observer(() => {
 
     return (
         <Routes>
-            {/* {isLogin && authRoutes.map(({ path, Component }) =>
-                <Route key={path} path={path} element=
-                    {
-                        <>
-                            <NavBar />
-                            <Component />
-                        </>
-                    } 
-                exact />
-            )}
-            {publicRoutes.map(({ path, Component }) =>
-                <Route key={path} path={path} element={<Component />} exact />
-            )}
-            <Route path="*" element={<Navigate to={LOGIN_ROUTE} replace />}
-            /> */}
+            <Route path={MAIN_ROUTE} element={<Main />} />
             <Route path={LOGIN_ROUTE} element={<Login />} />
             <Route path={REGISTRATION_ROUTE} element={<Registration />} />
-            <Route path={MAIN_ROUTE} element=
+            <Route path={PERSONAL_ACCOUNT_ROUTE} element={<PersonalAccount />} />
+            <Route path={ADMIN_ROUTE} element=
                 {
-                    <PrivateRoute>
-                        <NavBar />
-                        <Main />
-                    </PrivateRoute>
+                    <RoleRoute role='admin'>
+                        <Admin />
+                    </RoleRoute>
+                }>
+            </Route>
+            <Route path={DISPATCHER_ROUTE} element=
+                {
+                    <RoleRoute role='dispatcher'>
+                        <Dispatcher />
+                    </RoleRoute>
                 }>
             </Route>
         </Routes>

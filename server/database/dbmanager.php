@@ -27,14 +27,17 @@ class DataBaseManager
         }
     }
 
-    public function get_one_data($table_name, $column, $value)
+    public function get_with_condition($table_name, $column, $value, $one_record = true)
     {
         try{
         $query = "SELECT * FROM {$table_name} WHERE {$column} = :val";
         $statement = $this->pdo->prepare($query);
         $statement->bindValue(":val", $value);
         $statement->execute();
-        $data = $statement->fetch(PDO::FETCH_ASSOC);
+        if ($one_record)
+            $data = $statement->fetch(PDO::FETCH_ASSOC);
+        else
+            $data = $statement->fetchAll(PDO::FETCH_ASSOC);
         return $data;
         }
         catch (PDOException $e)
@@ -122,7 +125,7 @@ class DataBaseManager
         foreach($columns as $parameter) {
             $setParameters[] = ":" . $parameter;
         }
-
+        
         $setParameters = implode(', ', $setParameters);
 
         $sql = "CALL $procedure_name($setParameters)";

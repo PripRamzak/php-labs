@@ -2,19 +2,15 @@ import React, { useState } from 'react';
 import { Alert, Button, Dropdown, DropdownItem, Form, FormSelect, Modal } from 'react-bootstrap';
 import { addTicket } from '../../http/ticketApi';
 
-function CreateTicket({ show, onHide, cities, airlines }) {
+function CreateTicket({ show, onHide, cities, airlineId }) {
     const [departureCityId, setDepartureCityId] = useState(0)
     const [arrivalCityId, setArrivalCityId] = useState(0)
-    const [airlineId, setAirlineId] = useState(0)
     const [departureTime, setDepartureTime] = useState(new Date())
     const [arrivalTime, setArrivalTime] = useState(new Date())
     const [price, setPrice] = useState(0)
     const [alert, setAlert] = useState('')
 
     const createTicket = async () => {
-        console.log(price);
-        console.log(departureCityId)
-        console.log(arrivalCityId)
 
         if (departureCityId == 0) {
             setAlert('Введите город отправления');
@@ -82,7 +78,6 @@ function CreateTicket({ show, onHide, cities, airlines }) {
 
         setDepartureCityId(0);
         setArrivalCityId(0);
-        setAirlineId(0);
         setDepartureTime(new Date());
         setArrivalTime(new Date());
         setPrice(0);
@@ -115,13 +110,6 @@ function CreateTicket({ show, onHide, cities, airlines }) {
                         <option value={0}>Куда</option>
                         {cities.map(city =>
                             <option key={city.id} value={city.id}>{city.name}</option>
-                        )
-                        }
-                    </Form.Select>
-                    <Form.Select className='mt-2' onChange={e => setAirlineId(e.target.value)}>
-                        <option value={0}>Авиакомпания</option>
-                        {airlines.map(airline =>
-                            <option key={airline.id} value={airline.id}>{airline.name}</option>
                         )
                         }
                     </Form.Select>

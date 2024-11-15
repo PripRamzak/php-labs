@@ -23,7 +23,8 @@ const Registration = observer(() => {
         }
 
         try {
-            const response = await registration(username.trim(), email.trim(), password);
+            const user = {username: username.trim(), email: email.trim(), password: password, role: 'user'};
+            const response = await registration(user);
 
             if (response.error) {
                 console.log('Ошибки:', response.error);
@@ -31,7 +32,7 @@ const Registration = observer(() => {
             } 
             else 
             {
-                localStorage.setItem('user', JSON.stringify({username, password}));
+                localStorage.setItem('user', JSON.stringify({id: response, username: username.trim(), role: 'user'}));
                 navigate(MAIN_ROUTE);
             }
         }

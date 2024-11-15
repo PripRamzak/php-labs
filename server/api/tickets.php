@@ -25,6 +25,7 @@ error_log("Request Method: $requestMethod");
 
 $table_name = 'tickets';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
+$airline_id = isset($_GET['airlineId']) ? $_GET['airlineId'] : 0;
 
 error_log("Table Name: $table_name");
 error_log("Method: $method");
@@ -66,8 +67,6 @@ function validateTicketData($dbManager, &$data, $excludeId = null) {
             $arrival_time->setTimezone(new \DateTimeZone('Europe/Moscow'));
             $data['departure_time'] = $departure_time->format("Y-m-d H:i:s");
             $data['arrival_time'] = $arrival_time->format("Y-m-d H:i:s");
-            //$errors[] = $data['departure_time'];
-            $number = 5;
         }
     }
 
@@ -76,15 +75,16 @@ function validateTicketData($dbManager, &$data, $excludeId = null) {
 
 switch ($requestMethod) {
     case 'GET':
-        $data = $dbManager->get_all_data($table_name);
-
-        if (isset($data['error']) && strpos($data['error'], "Table 'aviasales.airlines' doesn't exist") !== false) {
-            $dbManager->create_table_rooms();
+        if ($airline_id > 0)
+        {
+            $data = $dbManager->get_with_condition($table_name, 'airline_id', $airline_id, false);
+            echo json_encode($data);
         }
-
-        $data = $dbManager->get_all_data($table_name);
-
-        echo json_encode($data);
+        else
+        {
+            $data = $dbManager->get_all_data($table_name);
+            echo json_encode($data);
+        }
         break;
 
     case 'POST':
@@ -97,11 +97,10 @@ switch ($requestMethod) {
 
             case 'insert':
                 $dataToInsert = isset($data) ? $data : [];
-                $number = 1;
                 $validationResult = validateTicketData($dbManager, $dataToInsert, $table_name);
                 if ($validationResult['status'] === 'ok') {
                     try {
-                        $result = $dbManager->insert_data($table_name, $dataToInsert);
+                        $result = $dbManager->call_procedure('create_ticket', $dataToInsert);
                         echo json_encode(['result' => $result]);
                     } catch (Exception $e) {
                         echo json_encode(['error' => $e->getMessage()]);

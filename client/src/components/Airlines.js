@@ -19,7 +19,6 @@ const Airlines = observer(({ airlines, getAirlines }) => {
 
     const handleSearchChange = (e) => {
         setSearchedAirline(e.target.value);
-        console.log(e.target.value);
         const filtred = airlines.filter((Airline) => Airline.name.toLowerCase().includes(e.target.value.toLowerCase()));
         setFiltredAirlines(filtred);
     }

@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Button, Row, Col, Form } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
-import { deleteTicket, fetchTickets } from '../http/ticketApi';
+import { deleteTicket, fetchTickets, fetchTicketsByAirlineId } from '../http/ticketApi';
 import CreateTicket from './modals/CreateTicket';
 import UpdateTicket from './modals/UpdateTicket';
 import { SearchInput } from './SearchInput';
+import CreateOrder from './modals/CreateOrder';
+import { fetchDispatcherByUserId } from '../http/dispatchersApi';
 
-const Tickets = observer(({ cities, airlines }) => {
+const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = false }) => {
+    const user = localStorage.getItem('user');
+    const userId = user ? JSON.parse(user).id : 0;
+    
     const [Tickets, setTickets] = useState([]);
     const [filtredTickets, setFiltredTickets] = useState([]);
     const [selectedTicket, setSelectedTicket] = useState({});
@@ -16,10 +21,13 @@ const Tickets = observer(({ cities, airlines }) => {
     const [searchedArrivalTime, setSearchedArrivalTime] = useState(new Date('Invalid'));
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
+    const [createOrderModalVisible, setCreateOrderModalVisible] = useState(false);
+
+    console.log(airlines);
 
     const getTickets = async () => {
         try {
-            const data = await fetchTickets();
+            const data = dispatcherPanel && !!dispatcher ? await fetchTicketsByAirlineId(dispatcher.airline_id) : await fetchTickets();
             if (Array.isArray(data)) {
                 setTickets(data);
                 setFiltredTickets(data);
@@ -33,7 +41,7 @@ const Tickets = observer(({ cities, airlines }) => {
 
     useEffect(() => {
         getTickets();
-    }, [cities, airlines]);
+    }, [cities, airlines, dispatcher]);
 
     const getDepartureCity = (ticket) => {
         if (cities.length === 0)
@@ -78,14 +86,12 @@ const Tickets = observer(({ cities, airlines }) => {
     }
 
     const handleSearchChange = () => {
-        console.log(searchedDepartureTime.toString())
-        console.log(isNaN(searchedDepartureTime.getTime()))
         const filtred = Tickets.filter((ticket) => getDepartureCity(ticket).toLowerCase().includes(searchedDepartureCity.toLowerCase().trim()) &&
             getArrivalCity(ticket).toLowerCase().includes(searchedArrivalCity.toLowerCase().trim()) &&
             (isNaN(searchedDepartureTime.getTime()) ||
                 (new Date(ticket.departure_time)).toISOString().substring(0, 10) === searchedDepartureTime.toISOString().substring(0, 10)) &&
-                (isNaN(searchedArrivalTime.getTime()) ||
-                    (new Date(ticket.arrival_time)).toISOString().substring(0, 10) === searchedArrivalTime.toISOString().substring(0, 10)));
+            (isNaN(searchedArrivalTime.getTime()) ||
+                (new Date(ticket.arrival_time)).toISOString().substring(0, 10) === searchedArrivalTime.toISOString().substring(0, 10)));
         setFiltredTickets(filtred);
     }
 
@@ -146,49 +152,79 @@ const Tickets = observer(({ cities, airlines }) => {
                         <th>Авиакомпания</th>
                         <th>Цена</th>
                         <th>
-                            <Button onClick={() => setCreateModalVisible(true)}>
-                                Добавить
-                            </Button>
+                            {dispatcherPanel &&
+                                <Button onClick={() => setCreateModalVisible(true)}>
+                                    Добавить
+                                </Button>
+                            }
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        filtredTickets.filter((ticket) => new Date(ticket.departure_time) > new Date()).map((Ticket) =>
-                            <tr key={Ticket.id}>
-                                <td>{getDepartureCity(Ticket)}</td>
-                                <td>{getArrivalCity(Ticket)}</td>
-                                <td>{getTimeDate(Ticket.departure_time)}</td>
-                                <td>{getTimeDate(Ticket.arrival_time)}</td>
-                                <td>{getAirline(Ticket)}</td>
-                                <td>{Ticket.price}</td>
-                                <td>
-                                    <Button onClick={() => { setUpdateModalVisible(true); setSelectedTicket(Ticket) }}>
-                                        Редактировать
-                                    </Button>
-                                    <Button className='ms-3' variant='outline-danger' onClick={() => handleDelete(Ticket.id)}>
-                                        Удалить
-                                    </Button>
-                                </td>
-                            </tr>
-
-                        )
+                        dispatcherPanel ?
+                            filtredTickets.map((ticket) =>
+                                <tr key={ticket.id}>
+                                    <td>{getDepartureCity(ticket)}</td>
+                                    <td>{getArrivalCity(ticket)}</td>
+                                    <td>{getTimeDate(ticket.departure_time)}</td>
+                                    <td>{getTimeDate(ticket.arrival_time)}</td>
+                                    <td>{getAirline(ticket)}</td>
+                                    <td>{ticket.price}</td>
+                                    <td>
+                                        <Button onClick={() => { setUpdateModalVisible(true); setSelectedTicket(ticket) }}>
+                                            Редактировать
+                                        </Button>
+                                        <Button className='ms-3' variant='outline-danger' onClick={() => handleDelete(ticket.id)}>
+                                            Удалить
+                                        </Button>
+                                    </td>
+                                </tr>)
+                            :
+                            filtredTickets.filter((ticket) => new Date(ticket.departure_time) > new Date()).map((ticket) =>
+                                <tr key={ticket.id}>
+                                    <td>{getDepartureCity(ticket)}</td>
+                                    <td>{getArrivalCity(ticket)}</td>
+                                    <td>{getTimeDate(ticket.departure_time)}</td>
+                                    <td>{getTimeDate(ticket.arrival_time)}</td>
+                                    <td>{getAirline(ticket)}</td>
+                                    <td>{ticket.price}</td>
+                                    <td>
+                                        <Button
+                                            className='ms-3'
+                                            variant='dark'
+                                            onClick={() => { setCreateOrderModalVisible(true); setSelectedTicket(ticket); }}>
+                                            Оформить
+                                        </Button>
+                                    </td>
+                                </tr>
+                            )
                     }
                 </tbody>
             </Table>
-            <CreateTicket
-                show={createModalVisible}
-                onHide={() => { setCreateModalVisible(false); getTickets(); }}
-                cities={cities}
-                airlines={airlines}
-            />
-            <UpdateTicket
-                show={updateModalVisible}
-                onHide={() => { setUpdateModalVisible(false); getTickets(); }}
-                cities={cities}
-                airlines={airlines}
-                ticket={selectedTicket}
-            />
+            {dispatcherPanel ?
+                <>
+                    <CreateTicket
+                        show={createModalVisible}
+                        onHide={() => { setCreateModalVisible(false); getTickets(); }}
+                        cities={cities}
+                        airlines={airlines}
+                    />
+                    <UpdateTicket
+                        show={updateModalVisible}
+                        onHide={() => { setUpdateModalVisible(false); getTickets(); }}
+                        cities={cities}
+                        airlines={airlines}
+                        ticket={selectedTicket}
+                    />
+                </>
+                :
+                <CreateOrder show={createOrderModalVisible}
+                    onHide={() => { setCreateOrderModalVisible(false); }}
+                    ticketId={selectedTicket.id}
+                    userId={userId}
+                />
+            }
         </Container >
     );
 })
