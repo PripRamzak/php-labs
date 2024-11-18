@@ -11,7 +11,7 @@ import { fetchDispatcherByUserId } from '../http/dispatchersApi';
 const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = false }) => {
     const user = localStorage.getItem('user');
     const userId = user ? JSON.parse(user).id : 0;
-    
+
     const [Tickets, setTickets] = useState([]);
     const [filtredTickets, setFiltredTickets] = useState([]);
     const [selectedTicket, setSelectedTicket] = useState({});
@@ -151,13 +151,15 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                         <th>Время прибытия</th>
                         <th>Авиакомпания</th>
                         <th>Цена</th>
-                        <th>
-                            {dispatcherPanel &&
-                                <Button onClick={() => setCreateModalVisible(true)}>
-                                    Добавить
-                                </Button>
-                            }
-                        </th>
+                        {!!user &&
+                            <th>
+                                {dispatcherPanel &&
+                                    <Button onClick={() => setCreateModalVisible(true)}>
+                                        Добавить
+                                    </Button>
+                                }
+                            </th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -189,14 +191,16 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                                     <td>{getTimeDate(ticket.arrival_time)}</td>
                                     <td>{getAirline(ticket)}</td>
                                     <td>{ticket.price}</td>
-                                    <td>
-                                        <Button
-                                            className='ms-3'
-                                            variant='dark'
-                                            onClick={() => { setCreateOrderModalVisible(true); setSelectedTicket(ticket); }}>
-                                            Оформить
-                                        </Button>
-                                    </td>
+                                    {!!user &&
+                                        <td>
+                                            <Button
+                                                className='ms-3'
+                                                variant='dark'
+                                                onClick={() => { setCreateOrderModalVisible(true); setSelectedTicket(ticket); }}>
+                                                Оформить
+                                            </Button>
+                                        </td>
+                                    }
                                 </tr>
                             )
                     }
