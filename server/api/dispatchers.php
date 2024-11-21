@@ -1,8 +1,9 @@
 <?php
+
 namespace database;
 
 header('Content-type: application/json');
-header("Access-Control-Allow-Origin: *"); // Замените на ваш домен
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -15,34 +16,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 use Exception;
 
-require_once (__DIR__.'/../database/dbmanager.php');
+require_once(__DIR__ . '/../database/dbmanager.php');
 
 $dbManager = new DataBaseManager();
 
-$errorLogPath = __DIR__ . '/../logs/myapp_errors.log';
-
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-error_log("Request Method: $requestMethod", 3, $errorLogPath);
 
 $table_name = 'dispatchers';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 $userId = isset($_GET['userId']) ? $_GET['userId'] : 0;
 
-error_log("Method: $method");
-
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
-error_log("Request Data: " . json_encode($data));
 
 switch ($requestMethod) {
     case 'GET':
-        if ($userId > 0)
-        {
+        if ($userId > 0) {
             $data = $dbManager->get_with_condition($table_name, 'user_id', $userId);
             echo json_encode($data);
-        }
-        else
-        {
+        } else {
             $data = $dbManager->get_all_data($table_name);
             echo json_encode($data);
         }
@@ -50,11 +42,6 @@ switch ($requestMethod) {
 
     case 'POST':
         switch ($method) {
-            case 'create_table':
-                createTableIfNotExists($dbManager, $table_name);
-                echo json_encode(['result' => 'Table checked/created']);
-                break;
-
             case 'delete':
                 $id = isset($data['id']) ? $data['id'] : null;
                 if ($id === null) {
@@ -68,12 +55,12 @@ switch ($requestMethod) {
             case 'update':
                 $condition = isset($data['id']) ? $data['id'] : null;
                 $newData = isset($data['new_data']) ? $data['new_data'] : null;
-                    try {
-                        $result = $dbManager->update_data($table_name, $newData, $condition);
-                        echo json_encode(['result' => $result]);
-                    } catch (Exception $e) {
-                        echo json_encode(['error' => [$e->getMessage()]]);
-                    }
+                try {
+                    $result = $dbManager->update_data($table_name, $newData, $condition);
+                    echo json_encode(['result' => $result]);
+                } catch (Exception $e) {
+                    echo json_encode(['error' => [$e->getMessage()]]);
+                }
                 break;
 
             default:
@@ -86,4 +73,3 @@ switch ($requestMethod) {
         echo json_encode(['error' => 'Method not allowed']);
         break;
 }
-?>

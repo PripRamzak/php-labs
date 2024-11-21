@@ -1,7 +1,8 @@
 <?php
+
 namespace DataBase;
 
-require_once (__DIR__.'/dbconnection.php');
+require_once(__DIR__ . '/dbconnection.php');
 
 use PDO;
 use PDOException;
@@ -10,12 +11,14 @@ class DataBaseManager
 {
     private $pdo;
 
-    public function __construct() {
+    public function __construct()
+    {
         $db = new DataBaseConnection();
         $this->pdo = $db->get_pdo();
     }
 
-    public function get_all_data($table_name) {
+    public function get_all_data($table_name)
+    {
         try {
             $query = "SELECT * FROM {$table_name}";
             $statement = $this->pdo->prepare($query);
@@ -29,24 +32,23 @@ class DataBaseManager
 
     public function get_with_condition($table_name, $column, $value, $one_record = true)
     {
-        try{
-        $query = "SELECT * FROM {$table_name} WHERE {$column} = :val";
-        $statement = $this->pdo->prepare($query);
-        $statement->bindValue(":val", $value);
-        $statement->execute();
-        if ($one_record)
-            $data = $statement->fetch(PDO::FETCH_ASSOC);
-        else
-            $data = $statement->fetchAll(PDO::FETCH_ASSOC);
-        return $data;
-        }
-        catch (PDOException $e)
-        {
+        try {
+            $query = "SELECT * FROM {$table_name} WHERE {$column} = :val";
+            $statement = $this->pdo->prepare($query);
+            $statement->bindValue(":val", $value);
+            $statement->execute();
+            if ($one_record)
+                $data = $statement->fetch(PDO::FETCH_ASSOC);
+            else
+                $data = $statement->fetchAll(PDO::FETCH_ASSOC);
+            return $data;
+        } catch (PDOException $e) {
             return ['error' => $e->getMessage()];
         }
     }
 
-    public function insert_data($table_name, $data) {
+    public function insert_data($table_name, $data)
+    {
         $columns = array_keys($data);
         $columnNames = implode(', ', $columns);
 
@@ -66,11 +68,13 @@ class DataBaseManager
         return $this->pdo->lastInsertId();
     }
 
-    public function get_pdo(){
+    public function get_pdo()
+    {
         return $this->pdo;
     }
 
-    public function create_table($table_name, $columns) {
+    public function create_table($table_name, $columns)
+    {
         $columnDefinitions = [];
 
         foreach ($columns as $column) {
@@ -88,7 +92,8 @@ class DataBaseManager
         return 'ok';
     }
 
-    public function delete_data($table_name, $id) {
+    public function delete_data($table_name, $id)
+    {
         $query = "DELETE FROM {$table_name} WHERE id = :id";
         $statement = $this->pdo->prepare($query);
         $statement->bindValue(':id', $id);
@@ -97,7 +102,8 @@ class DataBaseManager
         return $statement->rowCount();
     }
 
-    public function update_data($table_name, $data, $condition) {
+    public function update_data($table_name, $data, $condition)
+    {
         $columns = array_keys($data);
         $setStatements = [];
 
@@ -122,28 +128,25 @@ class DataBaseManager
         $columns = array_keys($data);
         $setParameters = [];
 
-        foreach($columns as $parameter) {
+        foreach ($columns as $parameter) {
             $setParameters[] = ":" . $parameter;
         }
-        
+
         $setParameters = implode(', ', $setParameters);
 
         $sql = "CALL $procedure_name($setParameters)";
 
         $stmt = $this->pdo->prepare($sql);
 
-        //echo($sql);
-        
-        foreach ($data as $parameter => $value)
-        {
-            //echo (':' . $parameter);
+        foreach ($data as $parameter => $value) {
             $stmt->bindValue(':' . $parameter, $value);
         }
 
         $stmt->execute();
     }
 
-    public function tableExists($tableName) {
+    public function tableExists($tableName)
+    {
         $query = "SHOW TABLES LIKE ?";
         $stmt = $this->pdo->prepare($query);
         $stmt->execute([$tableName]);

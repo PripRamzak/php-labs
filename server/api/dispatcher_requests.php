@@ -1,4 +1,5 @@
 <?php
+
 namespace database;
 
 header('Content-type: application/json');
@@ -15,57 +16,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 use Exception;
 
-require_once (__DIR__.'/../database/dbmanager.php');
+require_once(__DIR__ . '/../database/dbmanager.php');
 
 $dbManager = new DataBaseManager();
 
-$errorLogPath = __DIR__ . '/../logs/myapp_errors.log';
-
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-error_log("Request Method: $requestMethod", 3, $errorLogPath);
 
 $table_name = 'dispatcher_requests';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 $userId = isset($_GET['userId']) ? $_GET['userId'] : 0;
 
-error_log("Method: $method");
-
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
-error_log("Request Data: " . json_encode($data));
 
-function validateRequestData($dbManager, $data, $excludeId = null) {
+function validateRequestData($dbManager, $data, $excludeId = null)
+{
     $errors = [];
     global $table_name;
 
     if (empty($data['surname'])) {
         $errors[] = 'Фамилия обязательна';
-    }
-    elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['surname'])){
+    } elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['surname'])) {
         $errors[] = 'Фамилия должна содержать только русские буквы';
-    }
-    elseif (empty($data['firstname'])) {
+    } elseif (empty($data['firstname'])) {
         $errors[] = 'Имя обязательно';
-    } 
-    elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['firstname'])){
+    } elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['firstname'])) {
         $errors[] = 'Имя должно содержать только русские буквы';
-    }
-    elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['middlename']) &&!empty($data['middlename'])){
+    } elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['middlename']) && !empty($data['middlename'])) {
         $errors[] = 'Отчество должно содержать только русские буквы';
     }
-    
+
     return empty($errors) ? ['status' => 'ok'] : ['status' => 'error', 'error' => $errors];
 }
 
 switch ($requestMethod) {
     case 'GET':
-        if ($userId > 0)
-        {
+        if ($userId > 0) {
             $data = $dbManager->get_with_condition($table_name, 'user_id', $userId);
             echo json_encode($data);
-        }
-        else
-        {
+        } else {
             $data = $dbManager->get_all_data($table_name);
             echo json_encode($data);
         }
@@ -73,25 +62,20 @@ switch ($requestMethod) {
 
     case 'POST':
         switch ($method) {
-            case 'create_table':
-                createTableIfNotExists($dbManager, $table_name);
-                echo json_encode(['result' => 'Table checked/created']);
-                break;
-
-                case 'insert':
-                    $dataToInsert = isset($data) ? $data : [];
-                    $validationResult = validateRequestData($dbManager, $dataToInsert, $table_name);
-                    if ($validationResult['status'] === 'ok') {
-                        try {
-                            $result = $dbManager->insert_data($table_name, $dataToInsert);
-                            echo json_encode(['result' => $result]);
-                        } catch (Exception $e) {
-                            echo json_encode(['error' => $e->getMessage()]);
-                        }
-                    } else {
-                        echo json_encode($validationResult);
+            case 'insert':
+                $dataToInsert = isset($data) ? $data : [];
+                $validationResult = validateRequestData($dbManager, $dataToInsert, $table_name);
+                if ($validationResult['status'] === 'ok') {
+                    try {
+                        $result = $dbManager->insert_data($table_name, $dataToInsert);
+                        echo json_encode(['result' => $result]);
+                    } catch (Exception $e) {
+                        echo json_encode(['error' => $e->getMessage()]);
                     }
-                    break;
+                } else {
+                    echo json_encode($validationResult);
+                }
+                break;
 
             case 'delete':
                 $id = isset($data['id']) ? $data['id'] : null;
@@ -106,12 +90,12 @@ switch ($requestMethod) {
             case 'update':
                 $condition = isset($data['id']) ? $data['id'] : null;
                 $newData = isset($data['new_data']) ? $data['new_data'] : null;
-                    try {
-                        $result = $dbManager->update_data($table_name, $newData, $condition);
-                        echo json_encode(['result' => $result]);
-                    } catch (Exception $e) {
-                        echo json_encode(['error' => [$e->getMessage()]]);
-                    }
+                try {
+                    $result = $dbManager->update_data($table_name, $newData, $condition);
+                    echo json_encode(['result' => $result]);
+                } catch (Exception $e) {
+                    echo json_encode(['error' => [$e->getMessage()]]);
+                }
                 break;
 
             default:
@@ -124,4 +108,3 @@ switch ($requestMethod) {
         echo json_encode(['error' => 'Method not allowed']);
         break;
 }
-?>

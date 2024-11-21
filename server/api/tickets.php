@@ -1,4 +1,5 @@
 <?php
+
 namespace database;
 
 header('Content-type: application/json');
@@ -16,53 +17,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 use Exception;
 use DateTime;
 
-require_once (__DIR__.'/../database/dbmanager.php');
+require_once(__DIR__ . '/../database/dbmanager.php');
 
 $dbManager = new DataBaseManager();
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-error_log("Request Method: $requestMethod");
 
 $table_name = 'tickets';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 $airline_id = isset($_GET['airlineId']) ? $_GET['airlineId'] : 0;
 
-error_log("Table Name: $table_name");
-error_log("Method: $method");
-
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
-error_log("Request Data: " . json_encode($data));
 
 date_default_timezone_set('Etc/GMT+3');
 
-function validateTicketData($dbManager, &$data, $excludeId = null) {
+function validateTicketData(&$data)
+{
     $errors = [];
-    global $table_name;
 
     if (empty($data['departure_city_id']) || empty($data['arrival_city_id'])) {
         $errors[] = 'Название города обязательно ';
-    }
-    else if (empty($data['departure_time']) || empty($data['arrival_time'])) {
+    } else if (empty($data['departure_time']) || empty($data['arrival_time'])) {
         $errors[] = 'Время обязательно';
-    }
-    else if (empty($data['airline_id'])) {
+    } else if (empty($data['airline_id'])) {
         $errors[] = 'Название аэропорта обязательно';
-    }
-    else if (empty($data['price'])) {
+    } else if (empty($data['price'])) {
         $errors[] = 'Название аэропорта обязательно';
-    }
-    else
-    {
+    } else {
         $departure_time = new DateTime($data['departure_time'], new \DateTimeZone('UTC'));
         $arrival_time = new DateTime($data['arrival_time']);
         $now = new DateTime('now');
-        if ($departure_time < $now || $arrival_time < $now)
-        {
-        $errors[] = 'Невалидная дата';
-        }
-        else
-        {
+        if ($departure_time < $now || $arrival_time < $now) {
+            $errors[] = 'Невалидная дата';
+        } else {
             $departure_time->setTimezone(new \DateTimeZone('Europe/Moscow'));
             $arrival_time->setTimezone(new \DateTimeZone('Europe/Moscow'));
             $data['departure_time'] = $departure_time->format("Y-m-d H:i:s");
@@ -75,13 +63,10 @@ function validateTicketData($dbManager, &$data, $excludeId = null) {
 
 switch ($requestMethod) {
     case 'GET':
-        if ($airline_id > 0)
-        {
+        if ($airline_id > 0) {
             $data = $dbManager->get_with_condition($table_name, 'airline_id', $airline_id, false);
             echo json_encode($data);
-        }
-        else
-        {
+        } else {
             $data = $dbManager->get_all_data($table_name);
             echo json_encode($data);
         }
@@ -89,18 +74,12 @@ switch ($requestMethod) {
 
     case 'POST':
         switch ($method) {
-            case 'create_table':
-                $columns = isset($data['columns']) ? $data['columns'] : [];
-                $result = $dbManager->create_table($table_name, $columns);
-                echo json_encode(['result' => $result]);
-                break;
-
             case 'insert':
                 $dataToInsert = isset($data) ? $data : [];
                 $validationResult = validateTicketData($dbManager, $dataToInsert, $table_name);
                 if ($validationResult['status'] === 'ok') {
                     try {
-                        $result = $dbManager->insert_data($table_name, $dataToInsert);
+                        $result = $dbManager->call_procedure('create_ticket', $dataToInsert);
                         echo json_encode(['result' => $result]);
                     } catch (Exception $e) {
                         echo json_encode(['error' => $e->getMessage()]);

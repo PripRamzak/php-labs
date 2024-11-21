@@ -1,8 +1,9 @@
 <?php
+
 namespace database;
 
 header('Content-type: application/json');
-header("Access-Control-Allow-Origin: *"); // Замените на ваш домен
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -15,34 +16,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 use Exception;
 
-require_once (__DIR__.'/../database/dbmanager.php');
+require_once(__DIR__ . '/../database/dbmanager.php');
 
 $dbManager = new DataBaseManager();
 
-$errorLogPath = __DIR__ . '/../logs/myapp_errors.log';
-
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-error_log("Request Method: $requestMethod", 3, $errorLogPath);
 
 $table_name = 'users';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 
-error_log("Method: $method");
-
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
-error_log("Request Data: " . json_encode($data));
 
-function validateUserData($dbManager, $data, $excludeId = null) {
+function validateUserData($dbManager, $data, $excludeId = null)
+{
     $errors = [];
     global $table_name;
 
     if (empty($data['username'])) {
-        $errors[] = 'Введи имя пользователя';
+        $errors[] = 'Имя пользователя обязательно';
     } elseif (strlen($data['username']) > 16) {
-        $errors[] = 'Введи меньше 16 символов';
+        $errors[] = 'Имя пользователя не должно превышать 16 символов';
     } elseif (!preg_match('/^[a-zA-Z0-9]+$/', $data['username'])) {
-        $errors[] = 'МОЖНО ввести только АНГЛИЙСКИЕ буквы и цифры';
+        $errors[] = 'Имя пользователя может содержать только буквы и цифры';
     } else {
         $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $user) {
@@ -53,35 +49,23 @@ function validateUserData($dbManager, $data, $excludeId = null) {
     }
 
     if (empty($data['email'])) {
-        $errors[] = 'Введи Email обязательно';
+        $errors[] = 'Email обязательно';
     } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Неверно ввёл формат email';
+        $errors[] = 'Неверный формат email';
     } else {
         $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $user) {
             if ($user['email'] == $data['email'] && $user['id'] != $excludeId) {
-                $errors[] = 'Ты не один с таким email :(, его уже заняли';
+                $errors[] = 'Пользователь с таким email уже существует';
             }
         }
     }
 
     if (empty($data['password'])) {
-        $errors[] = 'Введи пароль)';
+        $errors[] = 'Пароль обязателен';
     }
 
     return empty($errors) ? ['status' => 'ok'] : ['status' => 'error', 'error' => $errors];
-}
-
-function createTableIfNotExists($dbManager, $table_name) {
-    if (!$dbManager->tableExists($table_name)) {
-        $columns = [
-            ['id' => 'INT AUTO_INCREMENT PRIMARY KEY'],
-            ['username' => 'VARCHAR(255) NOT NULL'],
-            ['email' => 'VARCHAR(255) NOT NULL UNIQUE'],
-            ['password_hash' => 'VARCHAR(255) NOT NULL']
-        ];
-        $dbManager->create_table($table_name, $columns);
-    }
 }
 
 switch ($requestMethod) {
@@ -100,20 +84,16 @@ switch ($requestMethod) {
             case 'login':
                 $username = isset($data['username']) ? $data['username'] : null;
                 $password = isset($data['password']) ? $data['password'] : null;
-                if ($username === null || $password === null)
-                {
-                    echo json_encode(['error' => 'Заполни все поля']);
+                if ($username === null || $password === null) {
+                    echo json_encode(['error' => 'Заполните все поля']);
                     exit;
                 }
                 $result = $dbManager->get_with_condition($table_name, 'username', $username);
-                
-                if(isset($result['error']))
-                {
+
+                if (isset($result['error'])) {
                     echo json_encode($result);
-                }
-                else if ($result['password'] != md5($password))
-                {
-                    echo json_encode(['error' => 'Введи верный пароль']);
+                } else if ($result['password'] != md5($password)) {
+                    echo json_encode(['error' => 'Неверный пароль']);
                     exit;
                 }
 
@@ -132,16 +112,14 @@ switch ($requestMethod) {
                         $dataToInsert['password'] = md5($dataToInsert['password']);
                         $result = $dbManager->insert_data($table_name, $dataToInsert);
                         echo json_encode($result);
-                    } 
-                    catch (Exception $e) {
+                    } catch (Exception $e) {
                         if (strpos($e->getMessage(), '1062 Duplicate entry') !== false) {
                             echo json_encode(['error' => 'Пользователь с таким username или email уже существует']);
                         } else {
                             echo json_encode(['error' => [$e->getMessage()]]);
                         }
                     }
-                } 
-                else {
+                } else {
                     echo json_encode($validationResult);
                 }
                 break;
@@ -160,12 +138,12 @@ switch ($requestMethod) {
                 $condition = isset($data['id']) ? $data['id'] : null;
                 $newData = isset($data['new_data']) ? $data['new_data'] : null;
 
-                    try {
-                        $result = $dbManager->update_data($table_name, $newData, $condition);
-                        echo json_encode(['result' => $result]);
-                    } catch (Exception $e) {
-                        echo json_encode(['error' => [$e->getMessage()]]);
-                    }
+                try {
+                    $result = $dbManager->update_data($table_name, $newData, $condition);
+                    echo json_encode(['result' => $result]);
+                } catch (Exception $e) {
+                    echo json_encode(['error' => [$e->getMessage()]]);
+                }
                 break;
 
             default:
@@ -178,4 +156,3 @@ switch ($requestMethod) {
         echo json_encode(['error' => 'Method not allowed']);
         break;
 }
-?>

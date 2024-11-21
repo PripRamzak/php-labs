@@ -1,4 +1,5 @@
-export const API_URL = 'http://localhost/labs/phplabs/server/api/'
+export const API_URL = 'https://localhost/aviasales/api/';
+//export const API_URL = 'http://localhost/labs/phplabs/server/api/'
 
 export const MAIN_ROUTE = '/'
 export const LOGIN_ROUTE = '/login'

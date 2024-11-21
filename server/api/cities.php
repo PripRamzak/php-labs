@@ -1,9 +1,9 @@
 <?php
+
 namespace database;
 
-
 header('Content-type: application/json');
-header("Access-Control-Allow-Origin: *"); // Замените на ваш домен
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -16,39 +16,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 use exception;
 
-require_once (__DIR__.'/../database/dbmanager.php');
+require_once(__DIR__ . '/../database/dbmanager.php');
 
 $dbManager = new DataBaseManager();
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-error_log("Request Method: $requestMethod");
 
 $table_name = 'cities';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 
-error_log("Table Name: $table_name");
-error_log("Method: $method");
-
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
-error_log("Request Data: " . json_encode($data));
 
-function validateCityData($dbManager, $data, $excludeId = null) {
+function validateCityData($dbManager, $data, $excludeId = null)
+{
     $errors = [];
     global $table_name;
 
     if (empty($data['name'])) {
         $errors[] = 'Название города обязательно';
-    } 
-    else if (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['name']))
-    {
+    } else if (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['name'])) {
         $errors[] = 'Название города должно содержать только русские буквы';
-    }
-    else 
-    {
+    } else {
         $allData = $dbManager->get_all_data($table_name);
-        foreach ($allData as $city) 
-        {
+        foreach ($allData as $city) {
             if ($city['name'] == $data['name'] && $city['id'] != $excludeId) {
                 $errors[] = 'Такой город уже существует';
                 break;
@@ -62,13 +53,6 @@ function validateCityData($dbManager, $data, $excludeId = null) {
 switch ($requestMethod) {
     case 'GET':
         $data = $dbManager->get_all_data($table_name);
-
-        if (isset($data['error']) && strpos($data['error'], "Table 'aviasales.cities' doesn't exist") !== false) {
-            $dbManager->create_table_rooms();
-        }
-
-        $data = $dbManager->get_all_data($table_name);
-
         echo json_encode($data);
         break;
 

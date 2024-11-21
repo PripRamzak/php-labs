@@ -152,16 +152,6 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                         <th>Авиакомпания</th>
                         <th>Цена</th>
                         {!!user &&
-<<<<<<< HEAD
-                        <th>
-                            {dispatcherPanel &&
-                                <Button onClick={() => setCreateModalVisible(true)}>
-                                    Добавить
-                                </Button>
-                            }
-                        </th>
-}
-=======
                             <th>
                                 {dispatcherPanel &&
                                     <Button onClick={() => setCreateModalVisible(true)}>
@@ -170,7 +160,6 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                                 }
                             </th>
                         }
->>>>>>> c45e6e4b32b6afd3e5627f743defb7bb1bde0127
                     </tr>
                 </thead>
                 <tbody>
@@ -203,17 +192,6 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                                     <td>{getAirline(ticket)}</td>
                                     <td>{ticket.price}</td>
                                     {!!user &&
-<<<<<<< HEAD
-                                    <td>
-                                        <Button
-                                            className='ms-3'
-                                            variant='dark'
-                                            onClick={() => { setCreateOrderModalVisible(true); setSelectedTicket(ticket); }}>
-                                            Оформить
-                                        </Button>
-                                    </td>
-}
-=======
                                         <td>
                                             <Button
                                                 className='ms-3'
@@ -223,7 +201,6 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                                             </Button>
                                         </td>
                                     }
->>>>>>> c45e6e4b32b6afd3e5627f743defb7bb1bde0127
                                 </tr>
                             )
                     }

@@ -5,7 +5,8 @@ namespace DataBase;
 use PDO;
 use PDOException;
 
-class DataBaseConnection {
+class DataBaseConnection
+{
     private $host = '127.0.0.1';
     private $db_name = 'aviasales';
     private $username = 'root';
@@ -13,11 +14,13 @@ class DataBaseConnection {
     private $pdo;
     private $port = '3306';
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->connect();
     }
 
-    private function connect() {
+    private function connect()
+    {
         try {
             $dsn = "mysql:host=$this->host;port=$this->port;dbname=$this->db_name";
             $this->pdo = new PDO($dsn, $this->username, $this->password);
@@ -35,7 +38,8 @@ class DataBaseConnection {
         }
     }
 
-    public function get_pdo() {
+    public function get_pdo()
+    {
         return $this->pdo;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace database;
 
 header('Content-type: application/json');
@@ -15,43 +16,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 use exception;
 
-require_once (__DIR__.'/../database/dbmanager.php');
+require_once(__DIR__ . '/../database/dbmanager.php');
 
 $dbManager = new DataBaseManager();
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
-error_log("Request Method: $requestMethod");
 
 $table_name = 'airlines';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 
-error_log("Table Name: $table_name");
-error_log("Method: $method");
-
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
-error_log("Request Data: " . json_encode($data));
 
-$chr_ru_en = "A-Za-zА-Яа-яЁё\s`~!@#$%^&*()_+-={}0-9|:;<>?,.\/\"\'\\\[\]";
-
-function validateAirlineData($dbManager, &$data, $excludeId = null) {
+function validateAirlineData($dbManager, &$data, $excludeId = null)
+{
     $errors = [];
     global $table_name;
 
     if (empty($data['name'])) {
         $errors[] = 'Название авиакомпании обязательно';
-    } 
-    else if (!preg_match('/^[^0-9!@#$%^&*()_+=\-{}\[\]:;"\'<>,.?\/`~]+$/u', $data['name'])) 
-    {
+    } else if (!preg_match('/^[^0-9!@#$%^&*()_+=\-{}\[\]:;"\'<>,.?\/`~]+$/u', $data['name'])) {
         $errors[] = 'Название авиакомпании не может содержать цифры и спец символы';
-    }
-    else 
-    {
+    } else {
         $data['name'] = preg_replace('/\s+/', ' ', $data['name']);
 
         $allData = $dbManager->get_all_data($table_name);
-        foreach ($allData as $airline) 
-        {
+        foreach ($allData as $airline) {
             if ($airline['name'] == $data['name'] && $airline['id'] != $excludeId) {
                 $errors[] = 'Такая авиакомпания уже существует';
                 break;
@@ -65,13 +55,6 @@ function validateAirlineData($dbManager, &$data, $excludeId = null) {
 switch ($requestMethod) {
     case 'GET':
         $data = $dbManager->get_all_data($table_name);
-
-        if (isset($data['error']) && strpos($data['error'], "Table 'aviasales.airlines' doesn't exist") !== false) {
-            $dbManager->create_table_rooms();
-        }
-
-        $data = $dbManager->get_all_data($table_name);
-
         echo json_encode($data);
         break;
 
