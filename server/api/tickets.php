@@ -100,7 +100,7 @@ switch ($requestMethod) {
                 $validationResult = validateTicketData($dbManager, $dataToInsert, $table_name);
                 if ($validationResult['status'] === 'ok') {
                     try {
-                        $result = $dbManager->call_procedure('create_ticket', $dataToInsert);
+                        $result = $dbManager->insert_data($table_name, $dataToInsert);
                         echo json_encode(['result' => $result]);
                     } catch (Exception $e) {
                         echo json_encode(['error' => $e->getMessage()]);

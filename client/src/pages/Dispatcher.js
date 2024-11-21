@@ -17,6 +17,8 @@ const Dispatcher = observer(() => {
     const user = localStorage.getItem('user');
     const userId = user ? JSON.parse(user).id : 0;
 
+    console.log(user);
+
     const [cities, setCities] = useState([]);
     const [airlines, setAirlines] = useState([]);
 

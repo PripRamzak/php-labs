@@ -38,11 +38,11 @@ function validateUserData($dbManager, $data, $excludeId = null) {
     global $table_name;
 
     if (empty($data['username'])) {
-        $errors[] = 'Имя пользователя обязательно';
+        $errors[] = 'Введи имя пользователя';
     } elseif (strlen($data['username']) > 16) {
-        $errors[] = 'Имя пользователя не должно превышать 16 символов';
+        $errors[] = 'Введи меньше 16 символов';
     } elseif (!preg_match('/^[a-zA-Z0-9]+$/', $data['username'])) {
-        $errors[] = 'Имя пользователя может содержать только буквы и цифры';
+        $errors[] = 'МОЖНО ввести только АНГЛИЙСКИЕ буквы и цифры';
     } else {
         $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $user) {
@@ -53,20 +53,20 @@ function validateUserData($dbManager, $data, $excludeId = null) {
     }
 
     if (empty($data['email'])) {
-        $errors[] = 'Email обязательно';
+        $errors[] = 'Введи Email обязательно';
     } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Неверный формат email';
+        $errors[] = 'Неверно ввёл формат email';
     } else {
         $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $user) {
             if ($user['email'] == $data['email'] && $user['id'] != $excludeId) {
-                $errors[] = 'Пользователь с таким email уже существует';
+                $errors[] = 'Ты не один с таким email :(, его уже заняли';
             }
         }
     }
 
     if (empty($data['password'])) {
-        $errors[] = 'Пароль обязателен';
+        $errors[] = 'Введи пароль)';
     }
 
     return empty($errors) ? ['status' => 'ok'] : ['status' => 'error', 'error' => $errors];
@@ -102,7 +102,7 @@ switch ($requestMethod) {
                 $password = isset($data['password']) ? $data['password'] : null;
                 if ($username === null || $password === null)
                 {
-                    echo json_encode(['error' => 'Заполните все поля']);
+                    echo json_encode(['error' => 'Заполни все поля']);
                     exit;
                 }
                 $result = $dbManager->get_with_condition($table_name, 'username', $username);
@@ -113,7 +113,7 @@ switch ($requestMethod) {
                 }
                 else if ($result['password'] != md5($password))
                 {
-                    echo json_encode(['error' => 'Неверный пароль']);
+                    echo json_encode(['error' => 'Введи верный пароль']);
                     exit;
                 }
 

@@ -60,17 +60,16 @@ const PersonalAccount = observer(() => {
         getRequest();
     }, []);
 
-
     return (
         <Container>
             <Orders cities={cities} airlines={airlines} />
-            {!request &&
+            {(!request && role != 'admin') &&
                 (
                     <>
                         <h4 className='mt-4 text-center'>Вы сотрудник авиакомпании? Оставьте заявку</h4>
                         <Button className='d-block mx-auto' size='lg' variant='dark' onClick={() => setRequestModalVisible(true)}>Оставить заявку</Button>
                         <CreateDispatcherRequest show={requestModalVisible}
-                            onHide={() => { setRequestModalVisible(false); }}
+                            onHide={() => { setRequestModalVisible(false); getRequest(); }}
                             airlines={airlines}
                             userId={userId}
                         />

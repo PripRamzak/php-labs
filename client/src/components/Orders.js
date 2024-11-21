@@ -149,9 +149,7 @@ const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false
                             <th>Авиакомпания</th>
                             <th>Цена</th>
                             <th>Статус</th>
-                            {dispatcherPanel &&
                                 <th />
-                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -210,6 +208,11 @@ const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false
                                             <td>{getAirline(ticket.airline_id)}</td>
                                             <td>{ticket.price}</td>
                                             <td>{getStatus(order.status)}</td>
+                                            <td>
+                                            <Button variant='outline-danger' onClick={() => { handleDelete(order.id); }}>
+                                                                    Отказаться
+                                                                </Button>
+                                            </td>
                                         </tr>
                                 }
                                 )

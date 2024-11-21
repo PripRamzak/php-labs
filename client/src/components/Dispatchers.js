@@ -9,7 +9,7 @@ import CreateOrder from './modals/CreateOrder';
 import { deleteRequest, fetchRequests, updateRequest } from '../http/dispatcherRequestApi';
 import { fetchUsers, updateUser } from '../http/userApi';
 import ErrorModal from './modals/Error';
-import { deleteDispatcher } from '../http/dispatchersApi';
+import { deleteDispatcher, fetchDispatchers } from '../http/dispatchersApi';
 
 const Dispatchers = observer(({ airlines, users }) => {
     const [dispatchers, setDispatchers] = useState([]);
@@ -19,7 +19,7 @@ const Dispatchers = observer(({ airlines, users }) => {
 
     const getDispatchers = async () => {
         try {
-            const data = await fetchRequests();
+            const data = await fetchDispatchers();
             if (Array.isArray(data)) {
                 setDispatchers(data);
             } else {

@@ -151,6 +151,7 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                         <th>Время прибытия</th>
                         <th>Авиакомпания</th>
                         <th>Цена</th>
+                        {!!user &&
                         <th>
                             {dispatcherPanel &&
                                 <Button onClick={() => setCreateModalVisible(true)}>
@@ -158,6 +159,7 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                                 </Button>
                             }
                         </th>
+}
                     </tr>
                 </thead>
                 <tbody>
@@ -189,6 +191,7 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                                     <td>{getTimeDate(ticket.arrival_time)}</td>
                                     <td>{getAirline(ticket)}</td>
                                     <td>{ticket.price}</td>
+                                    {!!user &&
                                     <td>
                                         <Button
                                             className='ms-3'
@@ -197,6 +200,7 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                                             Оформить
                                         </Button>
                                     </td>
+}
                                 </tr>
                             )
                     }
@@ -208,7 +212,7 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
                         show={createModalVisible}
                         onHide={() => { setCreateModalVisible(false); getTickets(); }}
                         cities={cities}
-                        airlines={airlines}
+                        airlineId={dispatcher.airline_id}
                     />
                     <UpdateTicket
                         show={updateModalVisible}

@@ -17,10 +17,7 @@ const Registration = observer(() => {
     const [alert, setAlert] = useState('')
 
     const click = async () => {
-        if (password !== confirmPassword) {
-            setAlert('Пароли не совпадают!');
-            return;
-        }
+        
 
         try {
             const user = {username: username.trim(), email: email.trim(), password: password, role: 'user'};
@@ -39,6 +36,10 @@ const Registration = observer(() => {
         catch (e) {
             console.error('Ошибка при регистрации пользователя:', e.message);
             setAlert('Ошибка регистрации');
+        }
+        if (password !== confirmPassword) {
+            setAlert('Пароли не совпадают!');
+            return;
         }
     }
 

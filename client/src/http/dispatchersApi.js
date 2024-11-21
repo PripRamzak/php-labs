@@ -24,7 +24,7 @@ export const fetchDispatchers = async () => {
 
 export const fetchDispatcherByUserId = async (id) => {
     try {
-        const response = await axios.get(`${API_URL}dispatcher_requests.php?userId=` + id);
+        const response = await axios.get(`${API_URL}dispatchers.php?userId=` + id);
 
         if (response.status !== 200) {
             throw new Error(`Ошибка сервера: ${response.statusText}`);

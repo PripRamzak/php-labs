@@ -50,7 +50,7 @@ function CreateDispatcherRequest({ show, onHide, airlines, userId }) {
             centered>
             <Modal.Header>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Оформить билет
+                    Оформить заявку на диспетчера
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

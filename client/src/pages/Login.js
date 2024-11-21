@@ -17,6 +17,20 @@ const Login = observer(() => {
 
     const click = async () => {
         try {
+            if (!password.trim() && !username.trim()) {
+                setAlert('Заполни поля "Имя пользователя" и "Пароль"');
+                return;
+            }
+
+            if (!username.trim()) {
+                setAlert('Заполни поле "Имя пользователя"');
+                return;
+            }
+            if (!password.trim()) {
+                setAlert('Заполни поле "Пароль"');
+                return;
+            }
+            
             const responseUser = await login(username.trim(), password);
 
             if (responseUser.error) {
@@ -25,6 +39,7 @@ const Login = observer(() => {
             }
             else {
                 const dispatcherData = await fetchDispatcherByUserId(responseUser.id);
+                console.log(dispatcherData);
                 if (dispatcherData) {
                     responseUser.role = 'dispatcher';
                 }
@@ -35,7 +50,7 @@ const Login = observer(() => {
         }
         catch (e) {
             console.error('Ошибка при входе:', e.message);
-            setAlert('Ошибка входа');
+            setAlert('Ошибка входа, возможно ты ввёл неправильные данные');
         }
     }
 

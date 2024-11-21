@@ -21,15 +21,6 @@ SET time_zone = "+00:00";
 -- База данных: `aviasales`
 --
 
-DELIMITER $$
---
--- Процедуры
---
-CREATE DEFINER=`root`@`localhost` PROCEDURE `create_ticket` (IN `_departure_time` DATETIME, IN `_arrival_time` DATETIME, IN `_price` DECIMAL, IN `_departure_city_id` INT, IN `_arrival_city_id` INT, IN `_airline_id` INT)  MODIFIES SQL DATA INSERT INTO tickets(departure_time, arrival_time, price, departure_city_id, arrival_city_id, airline_id)
-VALUES (_departure_time, _arrival_time, _price, _departure_city_id, _arrival_city_id, _airline_id)$$
-
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
