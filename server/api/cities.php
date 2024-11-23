@@ -35,8 +35,8 @@ function validateCityData($dbManager, $data, $excludeId = null)
 
     if (empty($data['name'])) {
         $errors[] = 'Название города обязательно';
-    } else if (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['name'])) {
-        $errors[] = 'Название города должно содержать только русские буквы';
+    } else if (!preg_match('/^(?!-)[а-яА-ЯёЁа-яА-ЯёЁ-]+(?<!-)$/u', $data['name'])) {
+        $errors[] = 'Название города должно содержать русские буквы';
     } else {
         $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $city) {

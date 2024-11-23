@@ -35,12 +35,12 @@ function validateOrderData($data)
 
     if (empty($data['surname'])) {
         $errors[] = 'Фамилия обязательна';
-    } elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['surname'])) {
-        $errors[] = 'Фамилия должна содержать только русские буквы';
+    } elseif (!preg_match('/^(?!-)[а-яА-ЯёЁа-яА-ЯёЁ-]+(?<!-)$/u', $data['surname'])) {
+        $errors[] = 'Фамилия должна содержать русские буквы';
     } elseif (empty($data['firstname'])) {
         $errors[] = 'Имя обязательно';
     } elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['firstname'])) {
-        $errors[] = 'Имя должно содержать только русские буквы';
+        $errors[] = 'Имя должно содержать русские буквы';
     } elseif (!preg_match('/^[а-яА-ЯёЁ]+$/u', $data['middlename']) && !empty($data['middlename'])) {
         $errors[] = 'Отчество должно содержать только русские буквы';
     }
@@ -61,14 +61,9 @@ switch ($requestMethod) {
 
     case 'POST':
         switch ($method) {
-            case 'create_table':
-                createTableIfNotExists($dbManager, $table_name);
-                echo json_encode(['result' => 'Table checked/created']);
-                break;
-
             case 'insert':
                 $dataToInsert = isset($data) ? $data : [];
-                $validationResult = validateOrderData($dbManager, $dataToInsert, $table_name);
+                $validationResult = validateOrderData($dataToInsert);
                 if ($validationResult['status'] === 'ok') {
                     try {
                         $result = $dbManager->insert_data($table_name, $dataToInsert);

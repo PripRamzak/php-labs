@@ -77,7 +77,6 @@ switch ($requestMethod) {
     case 'POST':
         switch ($method) {
             case 'create_table':
-                createTableIfNotExists($dbManager, $table_name);
                 echo json_encode(['result' => 'Table checked/created']);
                 break;
 
@@ -104,7 +103,6 @@ switch ($requestMethod) {
 
 
             case 'register':
-                createTableIfNotExists($dbManager, $table_name);
                 $dataToInsert = isset($data) ? $data : [];
                 $validationResult = validateUserData($dbManager, $dataToInsert);
                 if (isset($validationResult['status']) && $validationResult['status'] === 'ok') {

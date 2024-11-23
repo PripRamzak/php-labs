@@ -149,7 +149,7 @@ const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false
                             <th>Авиакомпания</th>
                             <th>Цена</th>
                             <th>Статус</th>
-                                <th />
+                            <th />
                         </tr>
                     </thead>
                     <tbody>
@@ -209,9 +209,13 @@ const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false
                                             <td>{ticket.price}</td>
                                             <td>{getStatus(order.status)}</td>
                                             <td>
-                                            <Button variant='outline-danger' onClick={() => { handleDelete(order.id); }}>
-                                                                    Отказаться
-                                                                </Button>
+                                                <Button variant='outline-danger' onClick={() => { handleDelete(order.id); }}>
+                                                    {
+                                                        order.status == 'denied' || new Date(ticket.departure_time) < new Date()
+                                                            ?
+                                                            'Удалить' : 'Отказаться'
+                                                    }
+                                                </Button>
                                             </td>
                                         </tr>
                                 }

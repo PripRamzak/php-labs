@@ -35,15 +35,16 @@ date_default_timezone_set('Etc/GMT+3');
 function validateTicketData(&$data)
 {
     $errors = [];
+    global $method;
 
     if (empty($data['departure_city_id']) || empty($data['arrival_city_id'])) {
         $errors[] = 'Название города обязательно ';
     } else if (empty($data['departure_time']) || empty($data['arrival_time'])) {
         $errors[] = 'Время обязательно';
-    } else if (empty($data['airline_id'])) {
+    } else if (empty($data['airline_id']) && strcasecmp($method, 'update') != 0) {
         $errors[] = 'Название аэропорта обязательно';
     } else if (empty($data['price'])) {
-        $errors[] = 'Название аэропорта обязательно';
+        $errors[] = 'Цена обязательна';
     } else {
         $departure_time = new DateTime($data['departure_time'], new \DateTimeZone('UTC'));
         $arrival_time = new DateTime($data['arrival_time']);
@@ -58,7 +59,7 @@ function validateTicketData(&$data)
         }
     }
 
-    return empty($errors) ? ['status' => 'ok'] : ['status' => 'error', 'error' => $errors];
+    return empty($errors) ? ['status' => 'ok'] : ['error' => $errors];
 }
 
 switch ($requestMethod) {
@@ -76,7 +77,7 @@ switch ($requestMethod) {
         switch ($method) {
             case 'insert':
                 $dataToInsert = isset($data) ? $data : [];
-                $validationResult = validateTicketData($dbManager, $dataToInsert, $table_name);
+                $validationResult = validateTicketData($dataToInsert);
                 if ($validationResult['status'] === 'ok') {
                     try {
                         $result = $dbManager->call_procedure('create_ticket', $dataToInsert);
@@ -103,7 +104,7 @@ switch ($requestMethod) {
                 $condition = isset($data['id']) ? $data['id'] : null;
                 $newData = isset($data['new_data']) ? $data['new_data'] : null;
 
-                $validationResult = validateTicketData($dbManager, $newData, $condition);
+                $validationResult = validateTicketData($newData);
                 if ($validationResult['status'] === 'ok') {
                     try {
                         $result = $dbManager->update_data($table_name, $newData, $condition);
