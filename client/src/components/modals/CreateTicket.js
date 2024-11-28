@@ -5,10 +5,24 @@ import { addTicket } from '../../http/ticketApi';
 function CreateTicket({ show, onHide, cities, airlineId }) {
     const [departureCityId, setDepartureCityId] = useState(0)
     const [arrivalCityId, setArrivalCityId] = useState(0)
-    const [departureTime, setDepartureTime] = useState(new Date())
-    const [arrivalTime, setArrivalTime] = useState(new Date())
+    const [departureTime, setDepartureTime] = useState({})
+    const [arrivalTime, setArrivalTime] = useState({})
     const [price, setPrice] = useState(0)
     const [alert, setAlert] = useState('')
+
+    const handleDate = (date) => {
+        try {
+            const year = date.split('-')[0];
+            if (year.length > 4) {
+                date = date.slice(0, 4) + date.slice(5);
+            }
+            console.log(date);
+            if (!isNaN(date))
+                setDepartureTime(new Date(date))
+        } catch (e) {
+            setAlert(e);
+        }
+    }
 
     const createTicket = async () => {
 
@@ -16,6 +30,9 @@ function CreateTicket({ show, onHide, cities, airlineId }) {
             setAlert('Введите город отправления');
             return;
         }
+
+        console.log(departureTime);
+        console.log(arrivalTime);
 
         if (arrivalCityId == 0) {
             setAlert('Введите город прибытия');
@@ -27,12 +44,12 @@ function CreateTicket({ show, onHide, cities, airlineId }) {
             return;
         }
 
-        if (isNaN(departureTime.getTime())) {
+        if (isNaN(departureTime)) {
             setAlert('Некорректное время отправления');
             return;
         }
 
-        if (isNaN(arrivalTime.getTime())) {
+        if (isNaN(arrivalTime)) {
             setAlert('Некорректное время прибытия');
             return;
         }
@@ -114,9 +131,17 @@ function CreateTicket({ show, onHide, cities, airlineId }) {
                         }
                     </Form.Select>
                     <Form.Label className='mt-2'>Время отправления</Form.Label>
-                    <Form.Control onChange={e => { try { setDepartureTime(new Date(e.target.value)) } catch (e) { setDepartureTime({}) } }} type='datetime-local' />
+                    <Form.Control onChange={e => {
+                        const date = new Date(e.target.value);
+                        if (!isNaN(date))
+                            setDepartureTime(new Date(date))
+                    }} type='datetime-local' />
                     <Form.Label className='mt-2'>Время прибытия</Form.Label>
-                    <Form.Control onChange={e => { try { setArrivalTime(new Date(e.target.value)) } catch (e) { setArrivalTime({}) } }} type='datetime-local' />
+                    <Form.Control onChange={e => {
+                        const date = new Date(e.target.value);
+                        if (!isNaN(date))
+                            setArrivalTime(new Date(date))
+                    }} type='datetime-local' />
                     <Form.Control className="mt-3" value={price} onChange={e => setPrice(e.target.value)} type='number' />
                 </Form>
                 {alert &&

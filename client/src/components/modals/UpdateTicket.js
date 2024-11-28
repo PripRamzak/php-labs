@@ -32,24 +32,29 @@ function UpdateTicket({ show, onHide, cities, ticket }) {
             return;
         }
 
-        if (isNaN(departureTime.getTime())) {
+        if (isNaN(departureTime)) {
             setAlert('Некорректное время отправления');
             return;
         }
 
-        if (isNaN(arrivalTime.getTime())) {
+        if (isNaN(arrivalTime)) {
             setAlert('Некорректное время прибытия');
             return;
         }
 
-        if (departureTime > arrivalTime) {
-            setAlert('Время отправления не может быть позже времени прибытия');
+        if (departureTime >= arrivalTime) {
+            setAlert('Время отправления не может быть позже или эквивалентно времени прибытия');
             return;
         }
 
         const now = new Date();
         if (departureTime.getTime() < now.getTime()) {
             setAlert('Некорректное время отправления');
+            return;
+        }
+
+        if (price <= 0) {
+            setAlert('Некорректная стоимость билета');
             return;
         }
 
