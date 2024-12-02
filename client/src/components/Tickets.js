@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Button, Row, Col, Form } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
-import { deleteTicket, fetchTickets, fetchTicketsByAirlineId } from '../http/ticketApi';
+import { deleteTicket, fetchPriorityTickets, fetchTickets, fetchTicketsByAirlineId } from '../http/ticketApi';
 import CreateTicket from './modals/CreateTicket';
 import UpdateTicket from './modals/UpdateTicket';
 import { SearchInput } from './SearchInput';
@@ -23,11 +23,18 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [createOrderModalVisible, setCreateOrderModalVisible] = useState(false);
 
-    console.log(airlines);
-
     const getTickets = async () => {
         try {
-            const data = dispatcherPanel && !!dispatcher ? await fetchTicketsByAirlineId(dispatcher.airline_id) : await fetchTickets();
+            let data;
+            if (dispatcherPanel && !!dispatcher)
+                data = await fetchTicketsByAirlineId(dispatcher.airline_id);
+            else if (!!user) {
+                data = await fetchPriorityTickets(userId);
+            }
+            else {
+                data = await fetchTickets();
+            }
+
             if (Array.isArray(data)) {
                 setTickets(data);
                 setFiltredTickets(data);

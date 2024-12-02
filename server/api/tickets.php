@@ -26,6 +26,7 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 $table_name = 'tickets';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 $airline_id = isset($_GET['airlineId']) ? $_GET['airlineId'] : 0;
+$user_id = isset($_GET['userId']) ? $_GET['userId'] : 0;
 
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
@@ -66,6 +67,9 @@ switch ($requestMethod) {
     case 'GET':
         if ($airline_id > 0) {
             $data = $dbManager->get_with_condition($table_name, 'airline_id', $airline_id, false);
+            echo json_encode($data);
+        } elseif ($user_id > 0) {
+            $data = $dbManager->call_procedure('priority_tickets', ['user_id' => $user_id]);
             echo json_encode($data);
         } else {
             $data = $dbManager->get_all_data($table_name);

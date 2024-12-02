@@ -21,6 +21,26 @@ export const fetchTickets = async () => {
     }
 };
 
+export const fetchPriorityTickets = async (id) => {
+    try {
+        const response = await axios.get(`${API_URL}tickets.php?userId=` + id);
+
+        if (response.status !== 200) {
+            throw new Error(`Ошибка сервера: ${response.statusText}`);
+        }
+
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.data && error.response.data.error) {
+            console.error('Ошибка от сервера:', error.response.data.error);
+            throw new Error(`Ошибка при загрузке данных: ${error.response.data.error}`);
+        }
+
+        console.error('Ошибка сети или другая ошибка:', error.message);
+        throw new Error('Ошибка при загрузке данных. Пожалуйста, попробуйте позже.');
+    }
+};
+
 export const fetchTicketsByAirlineId = async (id) => {
     try {
         const response = await axios.get(`${API_URL}tickets.php?airlineId=` + id);
