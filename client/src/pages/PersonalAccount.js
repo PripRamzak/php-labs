@@ -8,6 +8,7 @@ import { fetchTickets } from '../http/ticketApi';
 import CreateDispatcherRequest from '../components/modals/CreateDispatcherRequest';
 import { fetchRequestByUserId } from '../http/dispatcherRequestApi';
 import Orders from '../components/Orders';
+import DispatcherNotification from '../components/modals/DispatcherNotification';
 
 const PersonalAccount = observer(() => {
     const user = localStorage.getItem('user');
@@ -16,8 +17,13 @@ const PersonalAccount = observer(() => {
 
     const [cities, setCities] = useState([]);
     const [airlines, setAirlines] = useState([]);
-    const [request, setRequest] = useState({});
+    const [request, setRequest] = useState(null);
     const [requestModalVisible, setRequestModalVisible] = useState(false);
+    const [notificationVisible, setNotificationVisible] = useState(false);
+
+    //console.log(request);
+    //console.log(notificationVisible);
+    console.log(!!request);
 
     const getCities = async () => {
         try {
@@ -48,7 +54,13 @@ const PersonalAccount = observer(() => {
     const getRequest = async () => {
         try {
             const data = await fetchRequestByUserId(userId);
-            setRequest(data);
+            if (data != false) {
+                setRequest(data);
+                setNotificationVisible(data.status != 'pending');
+            }
+            else {
+                setRequest(null);
+            }
         } catch (err) {
             // setError(err.message || 'Ошибка при загрузке данных. Попробуйте позже.');
         }
@@ -63,7 +75,7 @@ const PersonalAccount = observer(() => {
     return (
         <Container>
             <Orders cities={cities} airlines={airlines} />
-            {(!request && role != 'admin') &&
+            {(!request && role == 'user') &&
                 (
                     <>
                         <h4 className='mt-4 text-center'>Вы сотрудник авиакомпании? Оставьте заявку</h4>
@@ -76,6 +88,10 @@ const PersonalAccount = observer(() => {
                     </>
                 )
             }
+            <DispatcherNotification show={notificationVisible}
+                onHide={() => { setNotificationVisible(false); }}
+                request={request}
+            />
         </Container >
 
     );
