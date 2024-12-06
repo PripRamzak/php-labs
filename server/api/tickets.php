@@ -69,7 +69,26 @@ switch ($requestMethod) {
             $data = $dbManager->get_with_condition($table_name, 'airline_id', $airline_id, false);
             echo json_encode($data);
         } elseif ($user_id > 0) {
-            $data = $dbManager->call_procedure('priority_tickets', ['user_id' => $user_id]);
+            $weights = json_decode(file_get_contents('../weights.json'), true);
+            arsort($weights);
+            $i = 1;
+            $parameters;
+            foreach (array_keys($weights) as $weight) {
+                switch ($weight) {
+                    case 'departure_city_weight':
+                        $parameters['column' . $i] = 'quan_departure_city';
+                        break;
+                    case 'arrival_city_weight':
+                        $parameters['column' . $i] = 'quan_arrival_city';
+                        break;
+                    case 'airline_weight':
+                        $parameters['column' . $i] = 'quan_airline';
+                        break;
+                }
+                $i++;
+            }
+            $parameters["user_id"] = $user_id;
+            $data = $dbManager->call_procedure('get_sorted_tickets', $parameters);
             echo json_encode($data);
         } else {
             $data = $dbManager->get_all_data($table_name);

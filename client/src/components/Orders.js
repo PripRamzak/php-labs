@@ -8,7 +8,7 @@ import { SearchInput } from './SearchInput';
 import { fetchTickets } from '../http/ticketApi';
 import { deleteOrder, fetchOrders, fetchOrdersByUserId, updateOrder } from '../http/ordersApi';
 
-const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false }) => {
+const Orders = observer(({loading, setLoadingTickets, setLoadingOrders, cities, airlines, dispatcher, dispatcherPanel = false }) => {
     const user = localStorage.getItem('user');
     const userId = user ? JSON.parse(user).id : 0;
 
@@ -26,6 +26,10 @@ const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false
         } catch (err) {
             // setError(err.message || 'Ошибка при загрузке данных. Попробуйте позже.');
         }
+        finally{
+            if (loading)
+                setLoadingTickets(false);
+        }
     };
 
     const getOrders = async () => {
@@ -39,6 +43,10 @@ const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false
             }
         } catch (err) {
             // setError(err.message || 'Ошибка при загрузке данных. Попробуйте позже.');
+        }
+        finally{
+            if (loading)
+                setLoadingOrders(false);
         }
     };
 
@@ -130,8 +138,8 @@ const Orders = observer(({ cities, airlines, dispatcher, dispatcherPanel = false
         getTickets();
     }, []);
 
-    console.log(dispatcherPanel);
-    console.log(orders);
+    if (loading)
+        return;
 
     return (
         <Container>

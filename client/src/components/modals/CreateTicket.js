@@ -10,19 +10,15 @@ function CreateTicket({ show, onHide, cities, airlineId }) {
     const [price, setPrice] = useState(0)
     const [alert, setAlert] = useState('')
 
-    const handleDate = (date) => {
-        try {
-            const year = date.split('-')[0];
-            if (year.length > 4) {
-                date = date.slice(0, 4) + date.slice(5);
-            }
-            console.log(date);
-            if (!isNaN(date))
-                setDepartureTime(new Date(date))
-        } catch (e) {
-            setAlert(e);
-        }
-    }
+    const weekDays = [
+        'воскресенье',
+        'понедельник',
+        'вторник',
+        'среда',
+        'четверг',
+        'пятница',
+        'суббота',
+    ]
 
     const createTicket = async () => {
 
@@ -95,12 +91,21 @@ function CreateTicket({ show, onHide, cities, airlineId }) {
 
         setDepartureCityId(0);
         setArrivalCityId(0);
-        setDepartureTime(new Date());
-        setArrivalTime(new Date());
+        setDepartureTime({});
+        setArrivalTime({});
         setPrice(0);
         setAlert('');
 
         onHide();
+    }
+
+    const clearInformation = () => {
+        setDepartureCityId(0);
+        setArrivalCityId(0);
+        setDepartureTime({});
+        setArrivalTime({});
+        setPrice(0);
+        setAlert('');
     }
 
     return (
@@ -130,17 +135,21 @@ function CreateTicket({ show, onHide, cities, airlineId }) {
                         )
                         }
                     </Form.Select>
-                    <Form.Label className='mt-2'>Время отправления</Form.Label>
+                    <Form.Label className='mt-2'>{isNaN(departureTime) ?
+                        'Время отправления' :
+                        'Время отправления. День недели: ' + weekDays[departureTime.getDay()]
+                    }
+                    </Form.Label>
                     <Form.Control onChange={e => {
                         const date = new Date(e.target.value);
-                        if (!isNaN(date))
-                            setDepartureTime(new Date(date))
+                        setDepartureTime(new Date(date))
                     }} type='datetime-local' />
-                    <Form.Label className='mt-2'>Время прибытия</Form.Label>
+                    <Form.Label className='mt-2'>{isNaN(arrivalTime) ?
+                        'Время отправления' :
+                        'Время отправления. День недели: ' + weekDays[arrivalTime.getDay()]}</Form.Label>
                     <Form.Control onChange={e => {
                         const date = new Date(e.target.value);
-                        if (!isNaN(date))
-                            setArrivalTime(new Date(date))
+                        setArrivalTime(new Date(date))
                     }} type='datetime-local' />
                     <Form.Control className="mt-3" value={price} onChange={e => setPrice(e.target.value)} type='number' />
                 </Form>
@@ -149,7 +158,7 @@ function CreateTicket({ show, onHide, cities, airlineId }) {
                 }
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="outline" onClick={onHide}>Закрыть</Button>
+                <Button variant="outline" onClick={e => { onHide(); clearInformation(); }}>Закрыть</Button>
                 <Button variant="outline" onClick={createTicket}>Добавить</Button>
             </Modal.Footer>
         </Modal>

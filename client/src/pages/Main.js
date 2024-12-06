@@ -6,10 +6,14 @@ import Airlines from '../components/Airlines';
 import Tickets from '../components/Tickets';
 import { fetchCities } from '../http/cityApi';
 import { fetchAirlines } from '../http/airlinesApi';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Main = observer(() => {
     const [cities, setCities] = useState([]);
     const [airlines, setAirlines] = useState([]);
+
+    const [loading, setLoading] = useState(true);
+    const [loadingTickets, setLoadingTickets] = useState(true);
 
     const getCities = async () => {
         try {
@@ -42,10 +46,16 @@ const Main = observer(() => {
         getAirlines();
     }, []);
 
+    useEffect(() => {
+        if (!loadingTickets)
+            setLoading(false);
+    }, [loadingTickets])
+
 
     return (
         <Container>
-            <Tickets cities={cities} airlines={airlines} dispatcherPanel={false} />
+            {loading && <LoadingSpinner />}
+            <Tickets loading={loading} setLoading={setLoadingTickets} cities={cities} airlines={airlines} dispatcherPanel={false} />
         </Container >
     );
 })

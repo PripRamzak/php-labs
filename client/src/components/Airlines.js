@@ -6,7 +6,7 @@ import CreateAirline from './modals/CreateAirline';
 import UpdateAirline from './modals/UpdateAirline';
 import { SearchInput } from './SearchInput';
 
-const Airlines = observer(({ airlines, getAirlines }) => {
+const Airlines = observer(({loading, airlines, getAirlines }) => {
     const [filtredAirlines, setFiltredAirlines] = useState([]);
     const [selectedAirline, setSelectedAirline] = useState({});
     const [searchedAirline, setSearchedAirline] = useState('');
@@ -32,6 +32,9 @@ const Airlines = observer(({ airlines, getAirlines }) => {
             throw new Error(e.message);
         }
     }
+
+    if (loading)
+        return;
 
     return (
         <Container>

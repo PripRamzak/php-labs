@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, Spinner } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import Cities from '../components/Cities';
 import Airlines from '../components/Airlines';
@@ -9,11 +9,19 @@ import DispatcherRequests from '../components/DispatcherRequests';
 import { fetchRequests } from '../http/dispatcherRequestApi';
 import { fetchUsers } from '../http/userApi';
 import Dispatchers from '../components/Dispatchers';
+import Weights from '../components/Weights';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Admin = observer(() => {
     const [cities, setCities] = useState([]);
     const [airlines, setAirlines] = useState([]);
     const [users, setUsers] = useState([]);
+
+    const [loading, setLoading] = useState(true);
+    const [loadingWeights, setLoadingWeights] = useState(true);
+    const [loadingDispatchers, setLoadingDispatchers] = useState(true);
+    const [loadingDispatchersRequests, setLoadingDispatchersRequests] = useState(true);
+
 
     const getCities = async () => {
         try {
@@ -61,13 +69,19 @@ const Admin = observer(() => {
         getUsers();
     }, []);
 
+    useEffect(() => {
+        if (!loadingWeights && !loadingDispatchers && !loadingDispatchersRequests)
+            setLoading(false);
+    }, [loadingWeights, loadingDispatchers, loadingDispatchersRequests])
 
     return (
         <Container>
-            <Cities cities={cities} getCities={getCities} />
-            <Airlines airlines={airlines} getAirlines={getAirlines} />
-            <Dispatchers airlines={airlines} users={users} />
-            <DispatcherRequests airlines={airlines} users={users} />
+            {loading && <LoadingSpinner />}
+            <Weights loading={loading} setLoading={setLoadingWeights} />
+            <Cities loading={loading} cities={cities} getCities={getCities} />
+            <Airlines loading={loading} airlines={airlines} getAirlines={getAirlines} />
+            <Dispatchers loading={loading} setLoading={setLoadingDispatchers} airlines={airlines} users={users} />
+            <DispatcherRequests loading={loading} setLoading={setLoadingDispatchersRequests} airlines={airlines} users={users} />
         </Container >
     );
 })

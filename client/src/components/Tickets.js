@@ -6,9 +6,8 @@ import CreateTicket from './modals/CreateTicket';
 import UpdateTicket from './modals/UpdateTicket';
 import { SearchInput } from './SearchInput';
 import CreateOrder from './modals/CreateOrder';
-import { fetchDispatcherByUserId } from '../http/dispatchersApi';
 
-const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = false }) => {
+const Tickets = observer(({loading, setLoading, cities, airlines, dispatcher, dispatcherPanel = false }) => {
     const user = localStorage.getItem('user');
     const userId = user ? JSON.parse(user).id : 0;
 
@@ -43,6 +42,10 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
             }
         } catch (err) {
             // setError(err.message || 'Ошибка при загрузке данных. Попробуйте позже.');
+        }
+        finally {
+            if (loading)
+                setLoading(false)
         }
     };
 
@@ -115,6 +118,9 @@ const Tickets = observer(({ cities, airlines, dispatcher, dispatcherPanel = fals
             throw new Error(e.message);
         }
     }
+
+    if (loading)
+        return;
 
     return (
         <Container>

@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
-import Cities from '../components/Cities';
-import Airlines from '../components/Airlines';
 import { fetchCities } from '../http/cityApi';
 import { fetchAirlines } from '../http/airlinesApi';
-import DispatcherRequests from '../components/DispatcherRequests';
-import { fetchRequests } from '../http/dispatcherRequestApi';
-import { fetchUsers } from '../http/userApi';
-import Dispatchers from '../components/Dispatchers';
 import Tickets from '../components/Tickets';
 import Orders from '../components/Orders';
 import { fetchDispatcherByUserId } from '../http/dispatchersApi';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Dispatcher = observer(() => {
     const user = localStorage.getItem('user');
     const userId = user ? JSON.parse(user).id : 0;
 
-    console.log(user);
-
     const [cities, setCities] = useState([]);
     const [airlines, setAirlines] = useState([]);
-
     const [dispatcher, setDispatcher] = useState({});
+
+    const [loading, setLoading] = useState(true);
+    const [loadingTickets, setLoadingTickets] = useState(true);
+    const [loadingTicketsOrders, setLoadingTicketsOrders] = useState(true);
+    const [loadingOrders, setLoadingOrders] = useState(true);
 
     const getCities = async () => {
         try {
@@ -65,11 +62,27 @@ const Dispatcher = observer(() => {
         getDispatcher();
     }, []);
 
+    useEffect(() => {
+        if (!loadingTickets && !loadingTicketsOrders && !loadingOrders)
+            setLoading(false);
+    })
+
 
     return (
         <Container>
-            <Tickets cities={cities} airlines={airlines} dispatcher={dispatcher} dispatcherPanel={true} />
-            <Orders cities={cities} airlines={airlines} dispatcher={dispatcher} dispatcherPanel={true} />
+            {loading && <LoadingSpinner />}
+            <Tickets loading={loading} s
+                setLoading={setLoadingTickets}
+                cities={cities} airlines={airlines}
+                dispatcher={dispatcher}
+                dispatcherPanel={true} />
+            <Orders loading={loading}
+                setLoadingTickets={setLoadingTicketsOrders}
+                setLoadingOrders={setLoadingOrders}
+                cities={cities}
+                airlines={airlines}
+                dispatcher={dispatcher}
+                dispatcherPanel={true} />
         </Container >
     );
 })

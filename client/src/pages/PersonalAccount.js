@@ -9,6 +9,7 @@ import CreateDispatcherRequest from '../components/modals/CreateDispatcherReques
 import { fetchRequestByUserId } from '../http/dispatcherRequestApi';
 import Orders from '../components/Orders';
 import DispatcherNotification from '../components/modals/DispatcherNotification';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const PersonalAccount = observer(() => {
     const user = localStorage.getItem('user');
@@ -21,9 +22,9 @@ const PersonalAccount = observer(() => {
     const [requestModalVisible, setRequestModalVisible] = useState(false);
     const [notificationVisible, setNotificationVisible] = useState(false);
 
-    //console.log(request);
-    //console.log(notificationVisible);
-    console.log(!!request);
+    const [loading, setLoading] = useState(true);
+    const [loadingTickets, setLoadingTickets] = useState(true);
+    const [loadingOrders, setLoadingOrders] = useState(true);
 
     const getCities = async () => {
         try {
@@ -72,9 +73,15 @@ const PersonalAccount = observer(() => {
         getRequest();
     }, []);
 
+    useEffect(() => {
+        if (!loadingTickets && !loadingOrders)
+            setLoading(false);
+    }, [loadingTickets, loadingOrders])
+
     return (
         <Container>
-            <Orders cities={cities} airlines={airlines} />
+            {loading && <LoadingSpinner />}
+            <Orders loading={loading} setLoadingTickets={setLoadingTickets} setLoadingOrders={setLoadingOrders} cities={cities} airlines={airlines} />
             {(!request && role == 'user') &&
                 (
                     <>

@@ -6,7 +6,7 @@ import CreateCity from './modals/CreateCity';
 import UpdateCity from './modals/UpdateCity';
 import { SearchInput } from './SearchInput';
 
-const Cities = observer(({ cities, getCities }) => {
+const Cities = observer(({loading, cities, getCities }) => {
     const [filtredCities, setFiltredCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState({});
     const [searchedCity, setSearchedCity] = useState('');
@@ -32,6 +32,9 @@ const Cities = observer(({ cities, getCities }) => {
             throw new Error(e.message);
         }
     }
+
+    if(loading)
+        return;
 
     return (
         <Container>

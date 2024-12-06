@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Table, Button, Row, Col, Form } from 'react-bootstrap';
+import { Container, Table, Button } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
-import { deleteTicket, fetchTickets } from '../http/ticketApi';
-import CreateTicket from './modals/CreateTicket';
-import UpdateTicket from './modals/UpdateTicket';
-import { SearchInput } from './SearchInput';
-import CreateOrder from './modals/CreateOrder';
 import { deleteRequest, fetchRequests, updateRequest } from '../http/dispatcherRequestApi';
-import { fetchUsers, updateUser } from '../http/userApi';
 import ErrorModal from './modals/Error';
 
-const DispatcherRequests = observer(({ airlines, users }) => {
+const DispatcherRequests = observer(({loading, setLoading, airlines, users }) => {
     const [requests, setRequests] = useState([]);
 
     const [errorMessage, setErrorMessage] = useState('');
@@ -27,6 +21,10 @@ const DispatcherRequests = observer(({ airlines, users }) => {
         } catch (err) {
             setErrorMessage(err.message || 'Ошибка при загрузке данных. Попробуйте позже.');
             setErrorModalVisible(true);
+        }
+        finally{
+            if (loading)
+                setLoading(false)
         }
     };
 
@@ -99,6 +97,9 @@ const DispatcherRequests = observer(({ airlines, users }) => {
             throw new Error(e.message);
         }
     }
+
+    if (loading)
+        return;
 
     return (
         <Container>

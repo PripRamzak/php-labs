@@ -21,6 +21,23 @@ function UpdateTicket({ show, onHide, cities, ticket }) {
         }
     }
 
+    const weekDays = [
+        'воскресенье',
+        'понедельник',
+        'вторник',
+        'среда',
+        'четверг',
+        'пятница',
+        'суббота',
+    ]
+
+    const clearInformation = () => {
+        setDepartureCityId(0);
+        setArrivalCityId(0);
+        setPrice(0);
+        setAlert('');
+    }
+
     const update = async () => {
         if (departureCityId === 0 || arrivalCityId === 0) {
             setAlert('Введите город');
@@ -76,7 +93,7 @@ function UpdateTicket({ show, onHide, cities, ticket }) {
             throw new Error(e.message);
         }
 
-        setAlert('');
+        clearInformation();
 
         onHide();
     }
@@ -109,10 +126,24 @@ function UpdateTicket({ show, onHide, cities, ticket }) {
                         )
                         }
                     </Form.Select>
-                    <Form.Label className='mt-2'>Время отправления</Form.Label>
-                    <Form.Control value={format(departureTime, "yyyy-MM-dd'T'HH:mm")} onChange={e => { try { setDepartureTime(new Date(e.target.value)) } catch (e) { } }} type='datetime-local' />
-                    <Form.Label className='mt-2'>Время прибытия</Form.Label>
-                    <Form.Control value={format(arrivalTime, "yyyy-MM-dd'T'HH:mm")} onChange={e => setArrivalTime(new Date(e.target.value))} type='datetime-local' />
+                    <Form.Label className='mt-2'>{isNaN(departureTime) ?
+                        'Время отправления' :
+                        'Время отправления. День недели: ' + weekDays[departureTime.getDay()]
+                    }
+                    </Form.Label>
+                    <Form.Control value={format(departureTime, "yyyy-MM-dd'T'HH:mm")} onChange={e => {
+                        const date = new Date(e.target.value);
+                        if (!isNaN(date))
+                            setDepartureTime(new Date(date))
+                    }} type='datetime-local' />
+                    <Form.Label className='mt-2'>{isNaN(arrivalTime) ?
+                        'Время прибытия' :
+                        'Время прибытия. День недели: ' + weekDays[arrivalTime.getDay()]}</Form.Label>
+                    <Form.Control value={format(arrivalTime, "yyyy-MM-dd'T'HH:mm")} onChange={e => {
+                        const date = new Date(e.target.value);
+                        if (!isNaN(date))
+                            setArrivalTime(new Date(date))
+                    }} type='datetime-local' />
                     <Form.Control className="mt-3" value={price} onChange={e => setPrice(e.target.value)} />
                 </Form>
                 {alert &&
@@ -120,7 +151,7 @@ function UpdateTicket({ show, onHide, cities, ticket }) {
                 }
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="outline" onClick={onHide}>Закрыть</Button>
+                <Button variant="outline" onClick={e => { onHide(); clearInformation(); }}>Закрыть</Button>
                 <Button variant="outline" onClick={update}>Обновить</Button>
             </Modal.Footer>
         </Modal>
