@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Дек 02 2024 г., 15:44
+-- Время создания: Дек 16 2024 г., 11:15
 -- Версия сервера: 10.4.32-MariaDB
 -- Версия PHP: 8.2.12
 
@@ -27,6 +27,39 @@ DELIMITER $$
 --
 CREATE DEFINER=`root`@`localhost` PROCEDURE `create_ticket` (IN `_departure_time` DATETIME, IN `_arrival_time` DATETIME, IN `_price` DECIMAL, IN `_departure_city_id` INT, IN `_arrival_city_id` INT, IN `_airline_id` INT)  MODIFIES SQL DATA INSERT INTO tickets(departure_time, arrival_time, price, departure_city_id, arrival_city_id, airline_id)
 VALUES (_departure_time, _arrival_time, _price, _departure_city_id, _arrival_city_id, _airline_id)$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_sorted_tickets` (IN `column1` VARCHAR(255), IN `column2` VARCHAR(255), IN `column3` VARCHAR(255), IN `_user_id` INT)   BEGIN
+    SET @sql = CONCAT('
+        SELECT t.*
+        FROM tickets AS t
+        LEFT JOIN (
+            SELECT tickets.airline_id, COUNT(*) AS quan_airline
+            FROM orders
+            JOIN tickets ON orders.ticket_id = tickets.id
+            WHERE user_id = ?
+            GROUP BY tickets.airline_id
+        ) AS popular_airlines ON t.airline_id = popular_airlines.airline_id
+        LEFT JOIN (
+            SELECT tickets.departure_city_id, COUNT(*) AS quan_departure_city
+            FROM orders
+            JOIN tickets ON orders.ticket_id = tickets.id
+            WHERE user_id = ?
+            GROUP BY tickets.departure_city_id
+        ) AS popular_departure_cities ON t.departure_city_id = popular_departure_cities.departure_city_id
+        LEFT JOIN (
+            SELECT tickets.arrival_city_id, COUNT(*) AS quan_arrival_city
+            FROM orders
+            JOIN tickets ON orders.ticket_id = tickets.id
+            WHERE user_id = ?
+            GROUP BY tickets.arrival_city_id
+        ) AS popular_arrival_cities ON t.arrival_city_id = popular_arrival_cities.arrival_city_id
+        ORDER BY ', column1, ' DESC, ', column2, ' DESC, ', column3, ' DESC, departure_time');
+
+    PREPARE stmt FROM @sql;
+    SET @userId = _user_id;
+    EXECUTE stmt USING @userId, @userId, @userId;
+    DEALLOCATE PREPARE stmt;
+END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `priority_tickets` (IN `_user_id` INT)   SELECT t.* from tickets as t
 LEFT JOIN (SELECT tickets.airline_id, count(*) as quan FROM orders
@@ -66,26 +99,27 @@ INSERT INTO `airlines` (`id`, `name`) VALUES
 
 CREATE TABLE `cities` (
   `id` int(255) NOT NULL,
-  `name` varchar(255) NOT NULL
+  `name` varchar(255) NOT NULL,
+  `img` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Дамп данных таблицы `cities`
 --
 
-INSERT INTO `cities` (`id`, `name`) VALUES
-(5, 'Берлин'),
-(16, 'вапва'),
-(8, 'Варшава'),
-(7, 'Вашингтон'),
-(17, 'Краков'),
-(6, 'Мадрид'),
-(1, 'Минск'),
-(2, 'Москва'),
-(3, 'Париж'),
-(10, 'Пекин'),
-(19, 'Рио-де-Жанейро'),
-(18, 'Рофланч');
+INSERT INTO `cities` (`id`, `name`, `img`) VALUES
+(1, 'Минск', ''),
+(2, 'Москва', ''),
+(3, 'Париж', ''),
+(5, 'Берлин', ''),
+(6, 'Мадрид', ''),
+(7, 'Вашингтон', ''),
+(8, 'Варшава', ''),
+(10, 'Пекин', ''),
+(16, 'вапва', ''),
+(17, 'Краков', ''),
+(18, 'Рофланч', ''),
+(19, 'Рио-де-Жанейро', '');
 
 -- --------------------------------------------------------
 
@@ -107,7 +141,9 @@ CREATE TABLE `dispatchers` (
 --
 
 INSERT INTO `dispatchers` (`id`, `surname`, `firstname`, `middlename`, `user_id`, `airline_id`) VALUES
-(1, 'Титович', 'Андрей', 'Петрович', 7, 2);
+(1, 'Титович', 'Андрей', 'Петрович', 7, 2),
+(2, 'Петров', 'Петр', '', 8, 11),
+(3, 'Иванов', 'Иван', '', 9, 10);
 
 -- --------------------------------------------------------
 
@@ -124,13 +160,6 @@ CREATE TABLE `dispatcher_requests` (
   `user_id` int(11) NOT NULL,
   `airline_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-
---
--- Дамп данных таблицы `dispatcher_requests`
---
-
-INSERT INTO `dispatcher_requests` (`id`, `surname`, `firstname`, `middlename`, `status`, `user_id`, `airline_id`) VALUES
-(2, 'тест', 'тест', '', 'denied', 2, 4);
 
 --
 -- Триггеры `dispatcher_requests`
@@ -170,7 +199,11 @@ INSERT INTO `orders` (`id`, `firstname`, `surname`, `middlename`, `status`, `use
 (4, 'Алексей', 'Сивец', 'Игорьевич', 'pending', 7, 10),
 (6, 'Пользователь', 'Новый', '', 'approved', 9, 10),
 (10, 'Перец', 'Крутой', '', 'pending', 7, 12),
-(11, 'Крутыч', 'Перцовый', '', 'pending', 7, 12);
+(11, 'Крутыч', 'Перцовый', '', 'pending', 7, 12),
+(12, 'Иванович', 'Иван', 'Петрович', 'pending', 8, 17),
+(13, 'Иванович', 'Иван', '', 'pending', 8, 11),
+(14, 'ааа', 'Петр', '', 'pending', 8, 11),
+(15, 'выв', 'выв', '', 'pending', 8, 17);
 
 -- --------------------------------------------------------
 
@@ -194,7 +227,7 @@ CREATE TABLE `tickets` (
 
 INSERT INTO `tickets` (`id`, `departure_time`, `arrival_time`, `price`, `departure_city_id`, `arrival_city_id`, `airline_id`) VALUES
 (1, '2024-12-23 12:16:00', '2024-12-24 06:09:00', 1200, 1, 8, 2),
-(2, '2026-11-10 14:00:00', '9999-10-30 09:09:00', 100, 1, 2, 2),
+(2, '9999-09-09 09:09:00', '9999-09-09 11:11:00', 100, 1, 2, 2),
 (3, '2024-10-21 00:25:00', '2024-10-21 14:08:00', 980, 2, 10, 4),
 (6, '2024-11-17 10:11:00', '2024-11-17 17:43:00', 501, 1, 6, 2),
 (7, '9999-09-08 11:01:00', '9999-09-09 09:09:00', 33333333, 7, 8, 2),
@@ -204,9 +237,12 @@ INSERT INTO `tickets` (`id`, `departure_time`, `arrival_time`, `price`, `departu
 (11, '2024-12-12 14:07:00', '2024-12-17 19:09:00', 100, 5, 7, 4),
 (12, '2222-09-09 11:13:00', '3293-03-09 04:24:00', 666, 16, 5, 10),
 (13, '2024-12-14 19:00:00', '9999-09-09 09:09:00', 150, 8, 7, 2),
-(14, '9999-09-09 09:09:00', '9999-09-09 09:09:00', 100, 5, 8, 2),
+(14, '9999-09-09 09:09:00', '9999-09-09 10:11:00', 100, 5, 8, 2),
 (15, '8888-08-08 08:08:00', '9999-09-09 09:09:00', 3333, 5, 8, 2),
-(16, '2024-12-13 14:00:00', '2024-12-13 23:59:00', 400, 1, 3, 2);
+(16, '2024-12-13 14:00:00', '2024-12-13 23:59:00', 400, 1, 3, 2),
+(17, '2025-10-17 17:00:00', '2222-10-18 12:23:00', 123, 17, 6, 10),
+(18, '3323-02-18 12:03:00', '4444-03-21 03:01:00', 321143, 17, 1, 10),
+(19, '2024-12-24 17:11:00', '2024-12-24 23:59:00', 100, 5, 7, 11);
 
 -- --------------------------------------------------------
 
@@ -311,25 +347,25 @@ ALTER TABLE `cities`
 -- AUTO_INCREMENT для таблицы `dispatchers`
 --
 ALTER TABLE `dispatchers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT для таблицы `dispatcher_requests`
 --
 ALTER TABLE `dispatcher_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT для таблицы `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT для таблицы `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT для таблицы `users`
