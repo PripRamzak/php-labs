@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Spinner } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
-import Cities from '../components/Cities';
-import Airlines from '../components/Airlines';
+import CitiesTable from '../components/CitiesTable';
+import AirlinesTable from '../components/AirlinesTable';
 import { fetchCities } from '../http/cityApi';
 import { fetchAirlines } from '../http/airlinesApi';
 import DispatcherRequests from '../components/DispatcherRequests';
@@ -78,8 +78,8 @@ const Admin = observer(() => {
         <Container>
             {loading && <LoadingSpinner />}
             <Weights loading={loading} setLoading={setLoadingWeights} />
-            <Cities loading={loading} cities={cities} getCities={getCities} />
-            <Airlines loading={loading} airlines={airlines} getAirlines={getAirlines} />
+            <CitiesTable loading={loading} cities={cities} getCities={getCities} />
+            <AirlinesTable loading={loading} airlines={airlines} getAirlines={getAirlines} />
             <Dispatchers loading={loading} setLoading={setLoadingDispatchers} airlines={airlines} users={users} />
             <DispatcherRequests loading={loading} setLoading={setLoadingDispatchersRequests} airlines={airlines} users={users} />
         </Container >

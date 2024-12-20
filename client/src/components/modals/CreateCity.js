@@ -1,27 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import { addCity } from '../../http/cityApi';
 
 function CreateCity({ show, onHide }) {
     const [name, setName] = useState('')
+    const [file, setFile] = useState(null)
     const [alert, setAlert] = useState('')
 
     const createCity = async () => {
+        if (!file) {
+            setAlert('Вы не выбрали файл');
+            return;
+        }
+
         try {
-            const result = await addCity(name.trim());
+            const formData = new FormData()
+            formData.append('name', name.trim())
+            formData.append('img', file)
+            const result = await addCity(formData);
             if (result.error) {
                 setAlert(result.error);
                 return;
             }
-            setName('');
         }
-        catch (e)
-        {
+        catch (e) {
             throw new Error(e.message);
         }
 
         onHide();
     }
+
+    useEffect(() => {
+        if (!show)
+        {
+            setName('');
+            setFile(null)
+            setAlert('')
+        }
+    }, [show])
 
     return (
         <Modal
@@ -37,6 +53,8 @@ function CreateCity({ show, onHide }) {
             <Modal.Body>
                 <Form>
                     <Form.Control value={name} onChange={e => setName(e.target.value)} placeholder={'Название города'} />
+                    <Form.Label className='mt-2'>Изображение города</Form.Label>
+                    <Form.Control type='file' onChange={(e) => setFile(e.target.files[0])} />
                 </Form>
                 {alert &&
                     <Alert className='mt-3 p-1 text-center' variant='danger'>{alert}</Alert>

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
-import Cities from '../components/Cities';
-import Airlines from '../components/Airlines';
 import Tickets from '../components/Tickets';
 import { fetchCities } from '../http/cityApi';
 import { fetchAirlines } from '../http/airlinesApi';

@@ -53,6 +53,7 @@ function validateUserData($dbManager, $data, $excludeId = null)
     } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Неверный формат email';
     } else {
+        echo json_encode('ok');
         $allData = $dbManager->get_all_data($table_name);
         foreach ($allData as $user) {
             if ($user['email'] == $data['email'] && $user['id'] != $excludeId) {

@@ -21,40 +21,31 @@ export const fetchCities = async () => {
     }
 };
 
-export const addCity = async (name) => {
+export const addCity = async (city) => {
     try {
-        const response = await fetch(`${API_URL}cities.php?method=insert`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({name}),
-        });
+        const response = await axios.post(`${API_URL}cities.php?method=insert`, city)
 
-        console.log('sended');
-
-        if (!response.ok) {
-            const text = response.text();
-            console.error('Ошибка от сервера:', text);
+        if (response.status !== 200) {
+            throw new Error(`Ошибка сервера: ${response.statusText}`);
         }
 
-        return await response.json();
+        return response.data;
     } catch (error) {
-        throw new Error(error.message);
+        throw new Error(`Ошибка при добавлении данных: ${error.response.data.error}`);
     }
 };
 
-export const updateCity = async (id, newData) => {
+export const updateCity = async (newData) => {
     try {
-        const response = await fetch(`${API_URL}cities.php?table_name=rooms&method=update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, new_data: newData }),
-        });
-        if (!response.ok) {
-            throw new Error('Ошибка при обновлении города');
+        const response = await axios.post(`${API_URL}cities.php?method=update`, newData)
+
+        if (response.status !== 200) {
+            throw new Error(`Ошибка сервера: ${response.statusText}`);
         }
-        return await response.json();
+
+        return response.data;
     } catch (error) {
-        throw new Error(error.message);
+        throw new Error(`Ошибка при добавлении данных: ${error.response.data.error}`);
     }
 };
 

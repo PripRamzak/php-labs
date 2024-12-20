@@ -63,13 +63,16 @@ function UpdateWeights({ show, onHide, weights }) {
             </Modal.Header>
             <Modal.Body>
                 <Form>
-                    <Form.Control className="mt-3"
+                    <Form.Label>Вес города отправления</Form.Label>
+                    <Form.Control
                         value={departureCityWeight}
                         onChange={e => handleChangeWeight(e.target.value, setDepartureCityWeight)} />
-                    <Form.Control className="mt-3"
+                    <Form.Label className='mt-2'>Вес города прибытия</Form.Label>
+                    <Form.Control
                         value={arrivalCityWeight}
                         onChange={e => handleChangeWeight(e.target.value, setArrivalCityWeight)} />
-                    <Form.Control className="mt-3"
+                    <Form.Label className='mt-2'>Вес авиакомпании</Form.Label>
+                    <Form.Control
                         value={airlineWeight}
                         onChange={e => handleChangeWeight(e.target.value, setAirlineWeight)} />
                 </Form>

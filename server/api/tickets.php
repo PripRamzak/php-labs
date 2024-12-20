@@ -74,17 +74,20 @@ switch ($requestMethod) {
             $i = 1;
             $parameters;
             foreach (array_keys($weights) as $weight) {
-                switch ($weight) {
-                    case 'departure_city_weight':
-                        $parameters['column' . $i] = 'quan_departure_city';
-                        break;
-                    case 'arrival_city_weight':
-                        $parameters['column' . $i] = 'quan_arrival_city';
-                        break;
-                    case 'airline_weight':
-                        $parameters['column' . $i] = 'quan_airline';
-                        break;
-                }
+                if ($weights[$weight] == 0)
+                    $parameters['column' . $i] = '';
+                else
+                    switch ($weight) {
+                        case 'departure_city_weight':
+                            $parameters['column' . $i] = 'quan_departure_city';
+                            break;
+                        case 'arrival_city_weight':
+                            $parameters['column' . $i] = 'quan_arrival_city';
+                            break;
+                        case 'airline_weight':
+                            $parameters['column' . $i] = 'quan_airline';
+                            break;
+                    }
                 $i++;
             }
             $parameters["user_id"] = $user_id;

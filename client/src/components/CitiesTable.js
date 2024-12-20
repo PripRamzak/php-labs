@@ -6,7 +6,7 @@ import CreateCity from './modals/CreateCity';
 import UpdateCity from './modals/UpdateCity';
 import { SearchInput } from './SearchInput';
 
-const Cities = observer(({loading, cities, getCities }) => {
+const CitiesTable = observer(({ loading, cities, getCities }) => {
     const [filtredCities, setFiltredCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState({});
     const [searchedCity, setSearchedCity] = useState('');
@@ -33,7 +33,7 @@ const Cities = observer(({loading, cities, getCities }) => {
         }
     }
 
-    if(loading)
+    if (loading)
         return;
 
     return (
@@ -75,4 +75,4 @@ const Cities = observer(({loading, cities, getCities }) => {
     );
 })
 
-export default Cities;
+export default CitiesTable;

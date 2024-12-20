@@ -21,40 +21,53 @@ export const fetchAirlines = async () => {
     }
 };
 
-export const addAirline = async (name) => {
+export const fetchAirlineImage = async (id) => {
     try {
-        const response = await fetch(`${API_URL}airlines.php?method=insert`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name }),
+        const response = await axios.get(`${API_URL}airlines.php?airlineId=` + id, {
+            responseType: 'arraybuffer' // Указываем тип ответа
         });
 
-        console.log('sended');
-
-        if (!response.ok) {
-            const text = response.text();
-            console.error('Ошибка от сервера:', text);
+        if (response.status !== 200) {
+            throw new Error(`Ошибка сервера: ${response.statusText}`);
         }
 
-        return await response.json();
-    } catch (error) {
-        throw new Error(error.message);
+        return response.data;
+    }
+    catch (error) {
+        if (error.response && error.response.data && error.response.data.error) {
+            console.error('Ошибка от сервера:', error.response.data.error);
+            throw new Error(`Ошибка при загрузке данных: ${error.response.data.error}`);
+        }
+
+        console.error('Ошибка сети или другая ошибка:', error.message);
+        throw new Error('Ошибка при загрузке данных. Пожалуйста, попробуйте позже.');
     }
 };
 
-export const updateAirline = async (id, newData) => {
+export const addAirline = async (airline) => {
     try {
-        const response = await fetch(`${API_URL}airlines.php?method=update`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, new_data: newData }),
-        });
-        if (!response.ok) {
-            throw new Error('Ошибка при обновлении аэропорта');
+        const response = await axios.post(`${API_URL}airlines.php?method=insert`, airline)
+
+        if (response.status !== 200) {
+            throw new Error(`Ошибка сервера: ${response.statusText}`);
         }
-        return await response.json();
+
+        return response.data;
     } catch (error) {
-        throw new Error(error.message);
+        throw new Error(`Ошибка при добавлении данных: ${error.response.data.error}`);
+    }
+};
+
+export const updateAirline = async (newData) => {
+    try {
+        const response = await axios.post(`${API_URL}airlines.php?method=update`, newData)
+        if (response.status !== 200) {
+            throw new Error(`Ошибка сервера: ${response.statusText}`);
+        }
+
+        return response.data;
+    } catch (error) {
+        throw new Error(`Ошибка при добавлении данных: ${error.response.data.error}`);
     }
 };
 

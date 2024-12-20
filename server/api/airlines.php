@@ -25,8 +25,39 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 $table_name = 'airlines';
 $method = isset($_GET['method']) ? $_GET['method'] : '';
 
+$name = $_POST['name'] ?? null;
+$airline_id = isset($_GET['airlineId']) ? $_GET['airlineId'] : 0;
+
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
+
+function processImage($img_require)
+{
+    global $targetDir;
+    if (isset($_FILES['img']) && $_FILES['img']['error'] === UPLOAD_ERR_OK) {
+        $targetFile = $targetDir . "/" . basename($_FILES["img"]["name"]);
+        $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+
+        // Ограничения на размер файла
+        if ($_FILES["img"]["size"] > 5000000) {
+            echo json_encode(['status' => 'error', 'error' => 'Sorry, your file is too large.']);
+            exit;
+        }
+
+        $allowedTypes = ['jpg', 'jpeg', 'png'];
+        if (!in_array($imageFileType, $allowedTypes)) {
+            echo json_encode(['status' => 'error', 'error' => 'Sorry, only JPG, JPEG, PNG files are allowed.']);
+            exit;
+        }
+
+        return file_get_contents($_FILES["img"]["tmp_name"]);
+    } elseif ($img_require) {
+        echo json_encode(['status' => 'error', 'error' => 'Image is required.']);
+        exit;
+    } else {
+        return false;
+    }
+}
 
 function validateAirlineData($dbManager, &$data, $excludeId = null)
 {
@@ -54,8 +85,19 @@ function validateAirlineData($dbManager, &$data, $excludeId = null)
 
 switch ($requestMethod) {
     case 'GET':
-        $data = $dbManager->get_all_data($table_name);
-        echo json_encode($data);
+        if ($airline_id > 0) {
+            header('Content-Type: image/jpeg');
+            $data = $dbManager->get_with_condition($table_name, 'id', $airline_id, true);
+            if ($data !== false)
+                echo ($data['img']);
+        } else {
+            $data = $dbManager->get_all_data($table_name);
+            foreach ($data as &$airline) {
+                unset($airline['img']);
+            }
+            echo json_encode($data);
+        }
+
         break;
 
     case 'POST':
@@ -67,7 +109,8 @@ switch ($requestMethod) {
                 break;
 
             case 'insert':
-                $dataToInsert = isset($data) ? $data : [];
+                $dataToInsert['name'] = $name;
+                $dataToInsert['img'] = processImage(true);
                 $validationResult = validateAirlineData($dbManager, $dataToInsert, $table_name);
                 if ($validationResult['status'] === 'ok') {
                     try {
@@ -92,8 +135,12 @@ switch ($requestMethod) {
                 break;
 
             case 'update':
-                $condition = isset($data['id']) ? $data['id'] : null;
-                $newData = isset($data['new_data']) ? $data['new_data'] : null;
+                $condition = $_POST['updated_id'] ?? null;
+                $newData['img'] = processImage(false, $imageDate);
+                $newData['name'] = $name;
+
+                if (!isset($newData['img']))
+                    unset($newData['img']);
 
                 $validationResult = validateAirlineData($dbManager, $newData, $condition);
                 if ($validationResult['status'] === 'ok') {

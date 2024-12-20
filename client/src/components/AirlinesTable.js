@@ -6,7 +6,7 @@ import CreateAirline from './modals/CreateAirline';
 import UpdateAirline from './modals/UpdateAirline';
 import { SearchInput } from './SearchInput';
 
-const Airlines = observer(({loading, airlines, getAirlines }) => {
+const AirlinesTable = observer(({ loading, airlines, getAirlines }) => {
     const [filtredAirlines, setFiltredAirlines] = useState([]);
     const [selectedAirline, setSelectedAirline] = useState({});
     const [searchedAirline, setSearchedAirline] = useState('');
@@ -75,4 +75,4 @@ const Airlines = observer(({loading, airlines, getAirlines }) => {
     );
 })
 
-export default Airlines;
+export default AirlinesTable;

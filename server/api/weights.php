@@ -24,11 +24,12 @@ $data = json_decode($json, true);
 function valideate_weights(&$data)
 {
     $errors = [];
-    if (empty($data['departure_city_weight'])) {
+    if (!isset($data['departure_city_weight'])) {
+        echo json_encode($data['departure_city_weight']);
         $errors[] = 'Задайте вес для города отправления';
-    } else if (empty($data['arrival_city_weight'])) {
+    } else if (!isset($data['arrival_city_weight'])) {
         $errors[] = 'Задайте вес для города прибытия';
-    } else if (empty($data['airline_weight'])) {
+    } else if (!isset($data['airline_weight'])) {
         $errors[] = 'Задайте вес для аэропорта';
     } else if ($data['departure_city_weight'] > 1 || $data['departure_city_weight'] < 0) {
         $errors[] = 'Значение веса должно быть больше 0 и меньше 1';
@@ -41,7 +42,13 @@ function valideate_weights(&$data)
         $data['departure_city_weight'] == $data['airline_weight'] ||
         $data['arrival_city_weight'] == $data['airline_weight']
     ) {
-        $errors[] = 'Значение весов не могут быть равны';
+        $zeros = 0;
+        foreach ($data as $column)
+            if ($column == 0)
+                $zeros += 1;
+
+        if ($zeros < 2)
+            $errors[] = 'Значение весов не могут быть равны';
     }
 
     return empty($errors) ? ['status' => 'ok'] : ['status' => 'error', 'error' => $errors];
