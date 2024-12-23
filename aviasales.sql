@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Дек 20 2024 г., 22:33
+-- Время создания: Дек 23 2024 г., 15:33
 -- Версия сервера: 10.4.32-MariaDB
 -- Версия PHP: 8.2.12
 
@@ -114,13 +114,13 @@ CREATE TABLE `cities` (
 --
 
 INSERT INTO `cities` (`id`, `name`, `img`) VALUES
-(1, 'Минск', '7cbf743a-3643-4ee7-b7fc-e499ac2bd845.jpg'),
+(1, 'Минск', '4f8ccd10-1eb5-4b71-9e7f-803f8a1524dd.jpg'),
 (2, 'Москва', '1a7fe016-7e98-4fbf-a221-5ca0c291ef65.jpg'),
 (3, 'Париж', '10a9161f-9016-47e3-86db-efdebc4c8226.jpg'),
 (5, 'Берлин', 'f3d74b4c-22f4-44d2-b5a6-e807e86da289.jpeg'),
 (6, 'Мадрид', '521af915-bb82-4db3-82d3-a7ae1a7f34e1.jpg'),
 (7, 'Вашингтон', '77f1e50b-ed66-472a-95d9-03e5ff7d58ed.jpg'),
-(8, 'Варшава', '8245ec90-1996-4b51-816d-81bd1f587b22.jpg'),
+(8, 'Варшава', 'c0b3a499-fbf4-4de1-aa5d-e06e09262110.jpg'),
 (10, 'Пекин', 'a0463808-da29-4080-a71e-f5d1a5e05837.jpg'),
 (16, 'Стокгольм', '7f59af87-4171-45fc-9e1a-98b9ff73a21e.jpg'),
 (17, 'Краков', '3264c9cd-5679-4a89-bc5a-eea85a3b6615.jpg'),
@@ -348,7 +348,7 @@ ALTER TABLE `airlines`
 -- AUTO_INCREMENT для таблицы `cities`
 --
 ALTER TABLE `cities`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT для таблицы `dispatchers`

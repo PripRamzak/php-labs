@@ -4,6 +4,7 @@ import { Context } from '..';
 import { Card, Col, Container, Image, Row } from 'react-bootstrap';
 import { fetchCities } from '../http/cityApi';
 import { API_URL } from '../utils/consts';
+import CityCard from '../components/CityCard';
 
 const Cities = observer(() => {
     const [cities, setCities] = useState([])
@@ -30,12 +31,7 @@ const Cities = observer(() => {
             <Row>
                 {cities.map(city =>
                     <Col key={city.id} className='mt-3' md={4}>
-                        <Card className="text-center" style={{ width: 350, borderWidth: '2px' }}>
-                            <Card.Body>
-                                <Card.Title className='d-flex justify-content-center'>{city.name}</Card.Title>
-                                <Card.Img className='mt-1' width={300} height={200} src={API_URL + "../img/cities/" + city.img} />
-                            </Card.Body>
-                        </Card>
+                        <CityCard city={city} />
                     </Col>
                 )}
             </Row>

@@ -51,13 +51,18 @@ function guidv4($data = null)
 function processImage($img_require)
 {
     global $targetDir;
-    if (isset($_FILES['img']) && $_FILES['img']['error'] === UPLOAD_ERR_OK) {
+    if (isset($_FILES['img'])) {
+        if ($_FILES['img']['error'] !== UPLOAD_ERR_OK) { {
+                echo json_encode(['error' => 'Ошибка при загрузке файла.']);
+                exit;
+            }
+        }
         $targetFile = $targetDir . "/" . basename($_FILES["img"]["name"]);
         $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
         // Ограничения на размер файла
         if ($_FILES["img"]["size"] > 5000000) {
-            echo json_encode(['status' => 'error', 'error' => 'Sorry, your file is too large.']);
+            echo json_encode(['status' => 'error', 'error' => 'Файл слишком большой']);
             exit;
         }
 
@@ -65,9 +70,9 @@ function processImage($img_require)
         $uploadingFile = $uuid . "." . $imageFileType;
 
         // Разрешенные форматы файлов
-        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+        $allowedTypes = ['jpg', 'jpeg', 'png'];
         if (!in_array($imageFileType, $allowedTypes)) {
-            echo json_encode(['status' => 'error', 'error' => 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.']);
+            echo json_encode(['status' => 'error', 'error' => 'Неправильный формат файла. Поддерживаются JPG, JPEG, PNG']);
             exit;
         }
 
@@ -75,11 +80,11 @@ function processImage($img_require)
         if (move_uploaded_file($_FILES["img"]["tmp_name"],  $targetDir . "/" . $uploadingFile)) {
             return $uploadingFile;
         } else {
-            echo json_encode(['status' => 'error', 'error' => 'Sorry, there was an error uploading your file.']);
+            echo json_encode(['status' => 'error', 'error' => 'Не удалось сохранить изоражение на сервере']);
             exit;
         }
     } elseif ($img_require) {
-        echo json_encode(['status' => 'error', 'error' => 'Image is required.']);
+        echo json_encode(['status' => 'error', 'error' => 'Файл не удалось загрузить из сети. Проверьте, может быть файл был удален']);
         exit;
     } else {
         return false;
@@ -144,7 +149,10 @@ switch ($requestMethod) {
                     echo json_encode(['error' => 'ID is required for delete operation.']);
                     exit;
                 }
+                $old_data = $dbManager->get_with_condition($table_name, 'id', $id);
                 $result = $dbManager->delete_data($table_name, $id);
+                unlink($targetDir . "/" . $old_data['img']);
+
                 echo json_encode(['result' => $result]);
                 break;
 
@@ -163,8 +171,9 @@ switch ($requestMethod) {
                 if ($validationResult['status'] === 'ok') {
                     try {
                         $result = $dbManager->update_data($table_name, $newData, $condition);
-                        // if ($img)
-                        //     unlink($targetDir . $old_data['img']);
+                        if ($img) {
+                            unlink($targetDir . "/" . $old_data['img']);
+                        }
                         echo json_encode(['result' => $result]);
                     } catch (Exception $e) {
                         echo json_encode(['error' => $e->getMessage()]);

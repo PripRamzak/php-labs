@@ -7,6 +7,32 @@ function CreateCity({ show, onHide }) {
     const [file, setFile] = useState(null)
     const [alert, setAlert] = useState('')
 
+    const checkFileAccess = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+
+                img.onerror = () => {
+                    reject(new Error('Файл изображения повреждён'));
+                };
+                img.onload = () => {
+                    resolve(true); // Файл успешно прочитан и изображение корректно
+                }; // Файл успешно прочитан
+            };
+
+            reader.onerror = () => {
+                // Здесь мы не можем различить ошибки, но можем уведомить пользователя
+                reject(new Error('Не удалось прочитать файл. Он может быть удалён или у вас нет доступа к нему'));
+            };
+
+            // Пытаемся прочитать файл как URL
+            reader.readAsDataURL(file);
+        });
+    };
+
     const createCity = async () => {
         if (!file) {
             setAlert('Вы не выбрали файл');
@@ -14,6 +40,7 @@ function CreateCity({ show, onHide }) {
         }
 
         try {
+            await checkFileAccess(file);
             const formData = new FormData()
             formData.append('name', name.trim())
             formData.append('img', file)
@@ -24,15 +51,15 @@ function CreateCity({ show, onHide }) {
             }
         }
         catch (e) {
-            throw new Error(e.message);
+            setAlert(e.message);
+            return;
         }
 
         onHide();
     }
 
     useEffect(() => {
-        if (!show)
-        {
+        if (!show) {
             setName('');
             setFile(null)
             setAlert('')

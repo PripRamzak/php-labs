@@ -5,26 +5,52 @@ import { API_URL } from '../../utils/consts';
 
 function UpdateCity({ show, onHide, city }) {
     const [name, setName] = useState('')
-    const [img, setImg] = useState('')
+    const [image, setImage] = useState('')
     const [file, setFile] = useState(null)
     const [alert, setAlert] = useState('')
 
     const handleOnShow = () => {
         if (!Object.keys(city).length !== 0) {
             setName(city.name);
-            setImg(city.img)
+            setImage(city.img)
         }
     }
 
-    console.log(name);
+    const checkFileAccess = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const img = new window.Image();
+                img.src = e.target.result;
+
+                img.onerror = () => {
+                    reject(new Error('Файл изображения повреждён'));
+                };
+                img.onload = () => {
+                    resolve(true); // Файл успешно прочитан и изображение корректно
+                }; // Файл успешно прочитан
+            };
+
+            reader.onerror = () => {
+                // Здесь мы не можем различить ошибки, но можем уведомить пользователя
+                reject(new Error('Не удалось прочитать файл. Он может быть удалён или у вас нет доступа к нему'));
+            };
+
+            // Пытаемся прочитать файл как URL
+            reader.readAsDataURL(file);
+        });
+    };
 
     const update = async () => {
         try {
             const formData = new FormData()
             formData.append('updated_id', city.id)
             formData.append('name', name.trim())
-            if (file)
+            if (file) {
+                await checkFileAccess(file)
                 formData.append('img', file)
+            }
             const result = await updateCity(formData);
             if (result.error) {
                 setAlert(result.error);
@@ -32,10 +58,9 @@ function UpdateCity({ show, onHide, city }) {
             }
         }
         catch (e) {
-            throw new Error(e.message);
+            setAlert(e.message);
+            return;
         }
-
-        setAlert('');
 
         onHide();
     }
@@ -62,7 +87,7 @@ function UpdateCity({ show, onHide, city }) {
                     <Form.Label className='mt-2'>Изображение города</Form.Label>
                     <Form.Control type='file' onChange={(e) => setFile(e.target.files[0])} />
                     <Form.Label className='mt-2'>Изображение города сейчас</Form.Label>
-                    <Image className='mt-1' width={300} height={200} src={API_URL + "../img/cities/" + img} />
+                    <Image className='mt-1' width={300} height={200} src={API_URL + "../img/cities/" + image} />
                 </Form>
                 {alert &&
                     <Alert className='mt-3 p-1 text-center' variant='danger'>{alert}</Alert>
