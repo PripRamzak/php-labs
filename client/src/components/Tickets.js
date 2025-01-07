@@ -6,8 +6,9 @@ import CreateTicket from './modals/CreateTicket';
 import UpdateTicket from './modals/UpdateTicket';
 import { SearchInput } from './SearchInput';
 import CreateOrder from './modals/CreateOrder';
+import Cookies from 'js-cookie';
 
-const Tickets = observer(({loading, setLoading, cities, airlines, dispatcher, dispatcherPanel = false }) => {
+const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, dispatcherPanel = false }) => {
     const user = localStorage.getItem('user');
     const userId = user ? JSON.parse(user).id : 0;
 
@@ -103,11 +104,13 @@ const Tickets = observer(({loading, setLoading, cities, airlines, dispatcher, di
             (isNaN(searchedArrivalTime.getTime()) ||
                 (new Date(ticket.arrival_time)).toISOString().substring(0, 10) === searchedArrivalTime.toISOString().substring(0, 10)));
         setFiltredTickets(filtred);
-    }
 
-    useEffect(() => {
-        handleSearchChange();
-    }, [searchedDepartureCity, searchedArrivalCity, searchedDepartureTime, searchedArrivalTime]);
+        if (searchedDepartureCity) 
+            updateCookie(searchedDepartureCity, 'recentDepartureCities');
+
+        if (searchedArrivalCity)
+            updateCookie(searchedArrivalCity, 'recentArrivalCities');
+    }
 
     const handleDelete = async (TicketId) => {
         try {
@@ -119,26 +122,42 @@ const Tickets = observer(({loading, setLoading, cities, airlines, dispatcher, di
         }
     }
 
+    const updateCookie = (value, cookieName) => {
+        let values = Cookies.get(cookieName) ? JSON.parse(Cookies.get(cookieName)) : [];
+        values = values.filter(v => v.toLowerCase() !== value.toLowerCase());
+        values.unshift(value);
+
+        if (values.length > 5) 
+            values.pop();
+
+        Cookies.set(cookieName, JSON.stringify(values), { expires: 7 });
+    }
+
     if (loading)
         return;
 
+    console.log(searchedDepartureCity);
+
     return (
         <Container>
-            {/* <h4 className='mt-2'>Города</h4> */}
-            <Row>
+            <Row className='d-flex align-items-center'>
                 <Col md={3}>
                     <SearchInput
+                        value={searchedDepartureCity}
                         onChange={(e) => setSearchedDepartureCity(e.target.value)}
+                        cookieName={'recentDepartureCities'}
                         placeholder={'Откуда'}
                     />
                 </Col>
                 <Col md={3}>
                     <SearchInput
+                        value={searchedArrivalCity}
                         onChange={(e) => setSearchedArrivalCity(e.target.value)}
+                        cookieName={'recentArrivalCities'}
                         placeholder={'Куда'}
                     />
                 </Col>
-                <Col md={3}>
+                <Col md={2}>
                     <Form.Control
                         className='mt-3'
                         onChange={(e) => { try { setSearchedDepartureTime(new Date(e.target.value)) } catch (e) { setSearchedArrivalTime({}) } }}
@@ -146,13 +165,16 @@ const Tickets = observer(({loading, setLoading, cities, airlines, dispatcher, di
                         type='date'
                     />
                 </Col>
-                <Col md={3}>
+                <Col md={2}>
                     <Form.Control
                         className='mt-3'
                         onChange={(e) => { try { setSearchedArrivalTime(new Date(e.target.value)) } catch (e) { setSearchedArrivalTime({}) } }}
                         placeholder={'Время отправки'}
                         type='date'
                     />
+                </Col>
+                <Col className='mt-3' md={2}>
+                    <Button style={{ width: '100%' }} variant='outline-dark' onClick={() => handleSearchChange()}>Найти</Button>
                 </Col>
             </Row>
             <Table bordered className='mt-2'>
