@@ -3,18 +3,17 @@ import { Button, Container, Table } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
 import { fetchCities } from '../http/cityApi';
 import { fetchAirlines } from '../http/airlinesApi';
-import { fetchOrdersByUserId } from '../http/ordersApi';
-import { fetchTickets } from '../http/ticketApi';
 import CreateDispatcherRequest from '../components/modals/CreateDispatcherRequest';
 import { fetchRequestByUserId } from '../http/dispatcherRequestApi';
 import Orders from '../components/Orders';
 import DispatcherNotification from '../components/modals/DispatcherNotification';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { decryptData } from '../utils/crypro';
 
 const PersonalAccount = observer(() => {
-    const user = localStorage.getItem('user');
-    const role = user ? JSON.parse(user).role : 'null';
-    const userId = user ? JSON.parse(user).id : 0;
+    const user = localStorage.getItem('user') ? decryptData(localStorage.getItem('user')) : null;
+    const role = user ? user.role : 'null';
+    const userId = user ? user.id : 0;
 
     const [cities, setCities] = useState([]);
     const [airlines, setAirlines] = useState([]);

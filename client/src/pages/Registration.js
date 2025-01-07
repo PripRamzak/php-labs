@@ -7,6 +7,7 @@ import { LOGIN_ROUTE, MAIN_ROUTE } from '../utils/consts';
 import { registration } from '../http/userApi';
 import { Context } from '..';
 import { observer } from 'mobx-react-lite';
+import { encryptData } from '../utils/crypro';
 
 const Registration = observer(() => {
     const navigate = useNavigate()
@@ -29,7 +30,8 @@ const Registration = observer(() => {
             } 
             else 
             {
-                localStorage.setItem('user', JSON.stringify({id: response, username: username.trim(), role: 'user'}));
+                const encryptedData = encryptData({id: response, username: username.trim(), role: 'user'});
+                localStorage.setItem('user', encryptedData);
                 navigate(MAIN_ROUTE);
             }
         }

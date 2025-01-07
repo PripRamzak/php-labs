@@ -7,10 +7,11 @@ import UpdateTicket from './modals/UpdateTicket';
 import { SearchInput } from './SearchInput';
 import CreateOrder from './modals/CreateOrder';
 import Cookies from 'js-cookie';
+import { decryptData, encryptData } from '../utils/crypro';
 
 const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, dispatcherPanel = false }) => {
-    const user = localStorage.getItem('user');
-    const userId = user ? JSON.parse(user).id : 0;
+    const user = localStorage.getItem('user') ? decryptData(localStorage.getItem('user')) : null;
+    const userId = user ? user.id : 0;
 
     const [Tickets, setTickets] = useState([]);
     const [filtredTickets, setFiltredTickets] = useState([]);
@@ -105,11 +106,13 @@ const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, d
                 (new Date(ticket.arrival_time)).toISOString().substring(0, 10) === searchedArrivalTime.toISOString().substring(0, 10)));
         setFiltredTickets(filtred);
 
-        if (searchedDepartureCity) 
-            updateCookie(searchedDepartureCity, 'recentDepartureCities');
+        if (userId > 0) {
+            if (searchedDepartureCity)
+                updateCookie(searchedDepartureCity, 'recentDepartureCities_' + userId);
 
-        if (searchedArrivalCity)
-            updateCookie(searchedArrivalCity, 'recentArrivalCities');
+            if (searchedArrivalCity)
+                updateCookie(searchedArrivalCity, 'recentArrivalCities_' + userId);
+        }
     }
 
     const handleDelete = async (TicketId) => {
@@ -123,14 +126,14 @@ const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, d
     }
 
     const updateCookie = (value, cookieName) => {
-        let values = Cookies.get(cookieName) ? JSON.parse(Cookies.get(cookieName)) : [];
+        let values = Cookies.get(cookieName) ? decryptData(Cookies.get(cookieName)) : [];
         values = values.filter(v => v.toLowerCase() !== value.toLowerCase());
         values.unshift(value);
 
-        if (values.length > 5) 
+        if (values.length > 5)
             values.pop();
 
-        Cookies.set(cookieName, JSON.stringify(values), { expires: 7 });
+        Cookies.set(cookieName, encryptData(values), { expires: 7 });
     }
 
     if (loading)
@@ -145,7 +148,7 @@ const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, d
                     <SearchInput
                         value={searchedDepartureCity}
                         onChange={(e) => setSearchedDepartureCity(e.target.value)}
-                        cookieName={'recentDepartureCities'}
+                        cookieName={'recentDepartureCities_' + userId}
                         placeholder={'Откуда'}
                     />
                 </Col>
@@ -153,7 +156,7 @@ const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, d
                     <SearchInput
                         value={searchedArrivalCity}
                         onChange={(e) => setSearchedArrivalCity(e.target.value)}
-                        cookieName={'recentArrivalCities'}
+                        cookieName={'recentArrivalCities_' + userId}
                         placeholder={'Куда'}
                     />
                 </Col>

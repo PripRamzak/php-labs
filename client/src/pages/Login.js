@@ -8,6 +8,7 @@ import { login } from '../http/userApi';
 import { Context } from '..';
 import { observer } from 'mobx-react-lite';
 import { fetchDispatcherByUserId } from '../http/dispatchersApi';
+import { encryptData } from '../utils/crypro';
 
 const Login = observer(() => {
     const navigate = useNavigate()
@@ -43,8 +44,8 @@ const Login = observer(() => {
                 if (dispatcherData) {
                     responseUser.role = 'dispatcher';
                 }
-
-                localStorage.setItem('user', JSON.stringify(responseUser));
+                const encryptedData = encryptData(responseUser);
+                localStorage.setItem('user', encryptedData);
                 navigate(MAIN_ROUTE);
             }
         }

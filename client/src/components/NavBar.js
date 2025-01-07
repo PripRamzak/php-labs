@@ -8,11 +8,12 @@ import { ADMIN_ROUTE, AIRLINES_ROUTE, CITIES_ROUTE, DISPATCHER_ROUTE, LOGIN_ROUT
 import { observer } from 'mobx-react-lite';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
+import { decryptData } from '../utils/crypro';
 
 const NavBar = observer(() => {
     const navigate = useNavigate()
-    const user = localStorage.getItem('user');
-    const role = user ? JSON.parse(user).role : 'null';
+    const user = localStorage.getItem('user') ? decryptData(localStorage.getItem('user')) : null;
+    const role = user ? user.role : 'null';
 
     const logOut = () => {
         localStorage.removeItem('user');

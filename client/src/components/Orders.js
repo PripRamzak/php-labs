@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Button, Row } from 'react-bootstrap';
 import { observer } from 'mobx-react-lite';
-import { deleteCity } from '../http/cityApi';
-import CreateCity from './modals/CreateCity';
-import UpdateCity from './modals/UpdateCity';
-import { SearchInput } from './SearchInput';
 import { fetchTickets } from '../http/ticketApi';
 import { deleteOrder, fetchOrders, fetchOrdersByUserId, updateOrder } from '../http/ordersApi';
+import { decryptData } from '../utils/crypro';
 
 const Orders = observer(({loading, setLoadingTickets, setLoadingOrders, cities, airlines, dispatcher, dispatcherPanel = false }) => {
-    const user = localStorage.getItem('user');
-    const userId = user ? JSON.parse(user).id : 0;
+    const user = localStorage.getItem('user') ? decryptData(localStorage.getItem('user')) : null;
+    const userId = user ? user.id : 0;
 
     const [orders, setOrders] = useState([]);
     const [tickets, setTickets] = useState([]);

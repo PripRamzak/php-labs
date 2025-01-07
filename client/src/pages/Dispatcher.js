@@ -7,10 +7,11 @@ import Tickets from '../components/Tickets';
 import Orders from '../components/Orders';
 import { fetchDispatcherByUserId } from '../http/dispatchersApi';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { decryptData } from '../utils/crypro';
 
 const Dispatcher = observer(() => {
-    const user = localStorage.getItem('user');
-    const userId = user ? JSON.parse(user).id : 0;
+    const user = localStorage.getItem('user') ? decryptData(localStorage.getItem('user')) : null;
+    const userId = user ? user.id : 0;
 
     const [cities, setCities] = useState([]);
     const [airlines, setAirlines] = useState([]);

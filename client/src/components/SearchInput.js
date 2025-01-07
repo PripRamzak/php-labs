@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dropdown, Form } from 'react-bootstrap';
 import Cookies from 'js-cookie';
+import { decryptData } from '../utils/crypro';
 
 export const SearchInput = ({value, onChange, cookieName, placeholder }) => {
     const [recentValues, setRecentValues] = useState([]);
@@ -9,7 +10,7 @@ export const SearchInput = ({value, onChange, cookieName, placeholder }) => {
     useEffect(() => {
         const values = Cookies.get(cookieName);
         if (values) {
-            setRecentValues(JSON.parse(values));
+            setRecentValues(decryptData(values));
         }
     }, [])
 
