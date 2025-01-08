@@ -3,12 +3,16 @@ import { Dropdown, Form } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { decryptData } from '../utils/crypro';
 
-export const SearchInput = ({value, onChange, cookieName, placeholder }) => {
+export const SearchInput = ({ value, onChange, cookieName, placeholder, cookie = true }) => {
     const [recentValues, setRecentValues] = useState([]);
     const [showRecentValues, setShowRecentValues] = useState(false)
 
     useEffect(() => {
-        const values = Cookies.get(cookieName);
+        let values;
+        if (cookie)
+            values = Cookies.get(cookieName);
+        else
+            values = sessionStorage.getItem(cookieName);
         if (values) {
             setRecentValues(decryptData(values));
         }

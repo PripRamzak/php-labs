@@ -111,7 +111,7 @@ const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, d
                 updateCookie(searchedDepartureCity, 'recentDepartureCities_' + userId);
 
             if (searchedArrivalCity)
-                updateCookie(searchedArrivalCity, 'recentArrivalCities_' + userId);
+                updateSession(searchedArrivalCity, 'recentArrivalCities_' + userId);
         }
     }
 
@@ -136,6 +136,17 @@ const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, d
         Cookies.set(cookieName, encryptData(values), { expires: 7 });
     }
 
+    const updateSession = (value, valueName) => {
+        let values = sessionStorage.getItem(valueName) ? decryptData(sessionStorage.getItem(valueName)) : [];
+        values = values.filter(v => v.toLowerCase() !== value.toLowerCase());
+        values.unshift(value);
+
+        if (values.length > 5)
+            values.pop();
+
+        sessionStorage.setItem(valueName, encryptData(values));
+    }
+
     if (loading)
         return;
 
@@ -158,6 +169,7 @@ const Tickets = observer(({ loading, setLoading, cities, airlines, dispatcher, d
                         onChange={(e) => setSearchedArrivalCity(e.target.value)}
                         cookieName={'recentArrivalCities_' + userId}
                         placeholder={'Куда'}
+                        cookie={false}
                     />
                 </Col>
                 <Col md={2}>
